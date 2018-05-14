@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+		<head>
+				<meta charset="utf-8">
+				<title>Final Project</title>
+				<script type="text/javascript" src="./d3/d3.js"></script>
+				<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+				<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+				<!-- BOOTSTRAP CSS -->
+				<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+				<link rel="stylesheet" href="./css/style.css">
+		</head>
+		<body>
+				<div class="container-fluid">
+						<div class="spacer">
+							&nbsp;
+						</div>
+
+						<!-- Main -->
+				    <div id="main" class="col-md-12">
+								<div class="row m-b-10">
+										<div class="col-md-12">
+											<br>
+												<h2>Stop and Frisk in New York City</h2>
+												<p>We found that the breakdown of the demographic of stop and frisk was as follows: 54% Black, 29% Latino, 11% White, 9% other. The overall population of New York City  was 45% White, 25% Black, 27% Latino, 3% other. There is a huge discrepancy, especially in Black residents of New York City, in the percentage of a given race in the city and the frequency that that race got stopped by officers. While only about a quarter of the population is Black, they represent over half of all people who are frisked. Below is a relevant article to show the further effects of the Stop and Frisk Policy in New York City</p>
+												<a href="http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective">http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective</a>
+
+												<br>
+																	<div class="row m-b-10 cont" style="margin-top: 75px;">
+																			<span class="dot black"></span>
+																			<button type="button" id="blackButton" class="nyc_map btn btn-secondary m-b-10">Black</button>
+																			<span class="dot white"></span>
+																			<button type="button" id="whiteButton" class="nyc_map btn btn-secondary m-b-10">White</button>
+																			<span class="dot asian"></span>
+																			<button type="button" id="asianButton" class="nyc_map btn btn-secondary m-b-10">Asian/Pacific Islander</button>
+																			<span class="dot native"></span>
+																			<button type="button" id="nativeButton" class="nyc_map btn btn-secondary m-b-10">American Indian/Alaskan Native</button>
+																			<span class="dot hispanic"></span>
+																			<button type="button" id="hispanicButton" class="nyc_map btn btn-secondary m-b-10">Hispanic</button>
+																			<span class="dot"></span>
+																			<button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
+																	</div>
+																	<div id="nyc_map" class="col-md-10"></div>
+																	<!-- <div id="timeline" class="col-md-10"></div> -->
+																	<div class="invisible" id="tooltip">
+										                <h6>Zip Code</h6>
+										                <p><span id="value"></span></p>
+	              									</div>
+															<!-- </div> -->
+															<br>
+
+
+
+										</div>
+								</div>
+						</div>
+
+		    <!-- <div id="brushTimeLine"></div> -->
+			</div>
+		</body>
+	<script type="text/javascript" src="./javascript/main_nyc_map.js"></script>
+</html>

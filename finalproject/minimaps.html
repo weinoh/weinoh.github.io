@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<meta charset="utf-8">
+		<title>Assignment 2</title>
+		<script type="text/javascript" src="./d3.js"></script>
+		<style type="text/css">
+			#nyc_map{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				background-color: white;
+      }
+			#brushTimeLine {
+  			display: flex;
+  			align-items: center;
+  			justify-content: center;
+			}
+
+			#background{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				background-color: rgba(155,155,0,0.5);
+			}
+
+			#nyc_title{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				font-family: Helvetica Neue;
+				font-size: 20;
+				font-weight: bold;
+				font-style: italic;
+				/*text-shadow: 2px 2px #ff0000;*/
+				text-decoration: underline;
+			}
+
+			#Part1{
+				margin-left: 100px;
+				margin-right:100px;
+				font-family: Helvetica Neue;
+			}
+
+			path.line{
+				clip-path: url(#clip);
+				fill: none;
+				stroke: #000;
+				stroke-width: 1.5;
+			}
+
+			.brush{
+				opacity: .3;
+				stroke: "gray";
+				fill: "gray";
+			}
+
+			.nonbrushed{
+				opacity: 0 ;
+			}
+
+			.brushed {
+				fill: red;
+				stroke: black;
+				stroke-width: 1;
+				opacity: .55;
+			}
+
+			hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+html, body{margin: 0; max-height: 100%; overflow: hidden; padding-bottom: 0px}
+
+#footer .container .row {
+    padding-bottom:8px;
+}
+
+		</style>
+	</head>
+	<body>
+		<!-- <h3 id="nyc_title"> Murders in NYC from 2006-2016 </h3> -->
+		<div id="background">
+    	<div id="nyc_map">
+				<div id="nyc_mini_a1"></div>
+				<div id="nyc_mini_a2"></div>
+				<div id="nyc_mini_a3"></div>
+				<div id="nyc_mini_b1"></div>
+				<div id="nyc_mini_b2"></div>
+				<div id="nyc_mini_b3"></div>
+			</div>
+		</div>
+		<br>
+    <!-- <div id="brushTimeLine"></div> -->
+		<script type="text/javascript">
+
+			var scale_whole = 75000;
+			var scale_mini = 25000;
+
+			//Width and height of map
+			var w_map = .9*window.innerWidth;
+			var h_map = window.innerHeight;
+			var padding_m = 10;
+
+			var w_mini = (w_map / 3) - padding_m;
+			var h_mini = (h_map/2) - padding_m;
+
+			var w_t = 900;
+			var h_t = 150;
+			var padding_t = 30;
+
+			var xScale, yScale, xAxis, yAxis, line;
+
+			var json_a1,json_a2,json_a3,json_b1,json_b2,json_b3;
+			var data_a1,data_a2,data_a3,data_b1,data_b2,data_b3;
+
+			var circles;
+      // projection
+      var projection_whole = d3.geoMercator()
+                      .center([-73.9352,40.7128])
+                      .translate([w_map/2, h_map/2])
+                      .scale([scale_whole]);
+
+
+			var projection_a1 = d3.geoMercator()
+	                    .center([-73.9352,40.7128])
+	                    .translate([w_mini/2, h_mini/2])
+	                    .scale([scale_mini]);
+
+			var projection_a2 = d3.geoMercator()
+	                    .center([-73.9352,40.7128])
+	                    .translate([1.5*w_mini, h_mini/2])
+	                    .scale([scale_mini]);
+
+			var projection_a3 = d3.geoMercator()
+	                    .center([-73.9352,40.7128])
+	                    .translate([2.5*w_mini, .5*h_mini])
+	                    .scale([scale_mini]);
+
+			var projection_b1 = d3.geoMercator()
+											.center([-73.9352,40.7128])
+											.translate([w_mini/2, 1.5*h_mini])
+											.scale([scale_mini]);
+
+			var projection_b2 = d3.geoMercator()
+											.center([-73.9352,40.7128])
+											.translate([1.5*w_mini, 1.5*h_mini])
+											.scale([scale_mini]);
+
+			var projection_b3 = d3.geoMercator()
+											.center([-73.9352,40.7128])
+											.translate([2.5*w_mini, 1.5*h_mini])
+											.scale([scale_mini]);
+			//Define path generator, using the Albers USA projection
+			var path_whole = d3.geoPath()
+						 .projection(projection_whole);
+
+			var path_a1 = d3.geoPath()
+				 		 .projection(projection_a1);
+
+			var path_a2 = d3.geoPath()
+				 		 .projection(projection_a2);
+
+		  var path_a3 = d3.geoPath()
+		 			 	 .projection(projection_a3);
+
+		  var path_b1 = d3.geoPath()
+			 			 .projection(projection_b1);
+
+		  var path_b2 = d3.geoPath()
+		 			   .projection(projection_b2);
+
+		  var path_b3 = d3.geoPath()
+		 			   .projection(projection_b3);
+
+
+			var color_a1 = d3.scaleQuantize()
+					.range(["rgba(35,110,145,0.25)","rgba(35,110,145,0.5)","rgba(35,110,145,0.75)","rgba(35,110,145,1)"]);
+			var color_a2 = d3.scaleQuantize()
+					.range(["rgba(110,35,145,0.25)","rgba(110,35,145,0.5)","rgba(110,35,145,0.75)","rgba(110,35,145,1)"]);
+			var color_a3 = d3.scaleQuantize()
+					.range(["rgba(145,110,35,0.25)","rgba(145,110,35,0.5)","rgba(145,110,35,0.75)","rgba(145,110,35,1)"]);
+			var color_b1 = d3.scaleQuantize()
+					.range(["rgba(35,145,110,0.25)","rgba(35,145,110,0.5)","rgba(35,145,110,0.75)","rgba(35,145,110,1)"]);
+			var color_b2 = d3.scaleQuantize()
+					.range(["rgba(110,145,35,0.25)","rgba(110,145,35,0.5)","rgba(110,145,35,0.75)","rgba(110,145,35,1)"]);
+			var color_b3 = d3.scaleQuantize()
+					.range(["rgba(145,35,110,0.25)","rgba(145,35,110,0.5)","rgba(145,35,110,0.75)","rgba(145,35,110,1)"]);
+
+
+
+			// Create SVG element
+			var background_svg = d3.select("#background_svg")
+						.append("svg")
+						.attr("width", w_map)
+						.attr("background-color", "rgb(155,155,0)");
+
+
+			var nycmap_svg = d3.select("#nyc_map")
+						.append("svg")
+						.attr("width", w_map)
+						.attr("height", h_map)
+						.attr("background-color", "rgb(155,155,0)");
+
+
+						// var nyc_mini_a1 = d3.select("#nyc_mini_a1")
+						// 			.append("svg")
+						// 			.attr("width", w_mini)
+						// 			.attr("height", h_mini);
+						//
+						//
+						// var nyc_mini_a2 = d3.select("#nyc_mini_a2")
+						// 			.append("svg")
+						// 			.attr("width", w_mini)
+						// 			.attr("height", h_mini);
+						//
+						// var nyc_mini_a3 = d3.select("#nyc_mini_a3")
+						// 			.append("svg")
+						// 			.attr("width", w_mini)
+						// 			.attr("height", h_mini);
+						//
+						// var nyc_mini_b1 = d3.select("#nyc_mini_b1")
+						// 			.append("svg")
+						// 			.attr("width", w_mini)
+						// 			.attr("height", h_mini);
+						//
+						//
+						// var nyc_mini_b2 = d3.select("#nyc_mini_b2")
+						// 			.append("svg")
+						// 			.attr("width", w_mini)
+						// 			.attr("height", h_mini);
+
+			// 						// svg align center
+			// d3.select("#nyc_mini_b3").attr("align","center"); //  thanks & +1 to chaitanya89
+			//
+			//
+			// 			var nyc_mini_b3 = d3.select("#nyc_mini_b3")
+			// 						.append("svg")
+			// 						.attr("width", w_mini)
+			// 						.attr("height", h_mini);
+
+
+			// d3 functions for parsing dates and times
+      var parseDate = d3.timeParse("%x");
+      var parseTime = d3.timeParse("%H");
+			var reparseDate = d3.timeParse("%a %b %d, %Y")
+
+			var parseDateTime = d3.timeParse("%x %X")
+			//For converting Dates to strings
+			var formatTime = d3.timeFormat("%Y");
+
+      //Row converter for murder data
+      var rowConverter = function(data){
+        return{
+            Indicator: parseFloat(data.indicator_id),
+						Pollutant: data.name,
+						Measure: data.Measure,
+						uhf_id: parseFloat(data.geo_entity_id),
+						uhf_name: data.geo_entity_name,
+						Year: data.year_description,
+						Amount: parseFloat(data.data_valuemessage),
+
+        };
+      }
+
+
+
+
+
+function setUpMap(pollutant_data, jsonToAlter, path, color){
+		//Set input domain for color scale
+		color.domain([
+			d3.min(pollutant_data, function(d) { return d.Amount; }),
+			d3.max(pollutant_data, function(d) { return d.Amount; })
+		]);
+		// Bind Data for specific pollutant to map
+		//Loop through once for each ag. data value
+		for (var i = 0; i < pollutant_data.length; i++) {
+
+			//Grab state name
+			var uhf_id = pollutant_data[i].uhf_id;
+
+			//Grab data value
+			var dataValue = pollutant_data[i].Amount;
+
+			//Find the corresponding state inside the GeoJSON
+			for (var j = 0; j < jsonToAlter.features.length; j++) {
+
+				var jsonUHF = jsonToAlter.features[j].properties.uhfcode;
+
+				if (jsonUHF == uhf_id) {
+
+					//Copy the data value into the JSON
+					jsonToAlter.features[j].properties.value = dataValue;
+
+					//Stop looking through the JSON
+					break;
+
+				}
+			}
+		}
+		//Bind data and create one path per GeoJSON feature
+		nycmap_svg.selectAll("path")
+			 .data(jsonToAlter.features)
+			 .enter()
+			 .append("path")
+			 .attr("d", path)
+			 .attr("stroke-width", 1.5)
+			 .attr("stroke", "white")
+			 .attr("fill", function(d){
+				 //Get data value
+				var value = d.properties.value;
+
+				if (value) {
+					//If value exists…
+					return color(value);
+				} else {
+					console.log(d.properties);
+					//If value is undefined…
+					return "#ccc";
+				}
+			 });
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+///// geo json
+////////////////////////////////////////////////////////////////////////////////
+		//Load in taxi data
+		d3.csv("UHF_Air_Quality.csv", rowConverter, function(error, data) {
+							// check for errors in data
+							if (error && error.target.status === 404) { console.log("File not found");}
+							if(data.length == 0){ console.log("File empty");}
+
+							var all_aq_data = data;
+							var data_a1 = all_aq_data.filter(function(d){
+																							return d.Indicator == 645;
+																						});
+
+							var data_a2 = all_aq_data.filter(function(d){
+																							return d.Indicator == 646;
+																						});
+							var data_a3 = all_aq_data.filter(function(d){
+																							return d.Indicator == 647;
+																						});
+							var data_b1 = all_aq_data.filter(function(d){
+																							return d.Indicator == 641;
+																						});
+							var data_b2 = all_aq_data.filter(function(d){
+																							return d.Indicator == 649;
+																						});
+							var data_b3 = all_aq_data.filter(function(d){
+																							return d.Indicator == 650;
+																						});
+
+
+							//Load in GeoJSON data
+							//////////////////////////////////////////////////////////////////
+			  			d3.json("uhf42.geojson", function(json) {
+								json_a1 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+								json_a2 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+								json_a3 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+								json_b1 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+								json_b2 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+								json_b3 = JSON.parse(JSON.stringify(json)); //new json object herejson;
+
+								setUpMap(data_a1, json_a1, path_a1, color_a1);
+								setUpMap(data_a2, json_a2, path_a2, color_a2);
+								setUpMap(data_a3, json_a3, path_a3, color_a3);
+								setUpMap(data_b1, json_b1, path_b1, color_b1);
+								setUpMap(data_b2, json_b2, path_b2, color_b2);
+								setUpMap(data_b3, json_b3, path_b3, color_b3);
+
+								console.log(json_a1);
+								console.log(json_a2);
+
+
+								// setUpMap(data_a1, json_a1, path_a1, color_a1, nyc_mini_a1);
+								// setUpMap(data_a2, json_a2, path_a2, color_a2, nyc_mini_a2);
+								// setUpMap(data_a3, json_a3, path_a3, color_a3, nyc_mini_a3);
+								// setUpMap(data_b1, json_b1, path_b1, color_b1, nyc_mini_b1);
+								// setUpMap(data_b2, json_b2, path_b2, color_b2, nyc_mini_b2);
+								// setUpMap(data_b3, json_b3, path_b3, color_b3, nyc_mini_b3);
+					});
+					// end of csv loading
+
+
+        });
+				// end of json loading
+
+
+
+
+
+
+		</script>
+	</body>
+</html>

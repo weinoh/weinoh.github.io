@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+
+		<meta charset="utf-8">
+		<title>Assignment 2</title>
+		<script type="text/javascript" src="./d3.js"></script>
+		<style type="text/css">
+			#nyc_map{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				background-color: white;
+      }
+			#brushTimeLine {
+  			display: flex;
+  			align-items: center;
+  			justify-content: center;
+			}
+
+			#background{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				background-color: rgba(102, 102, 153,0.5);
+			}
+
+			#nyc_title{
+				display: flex;
+  			align-items: center;
+  			justify-content: center;
+				font-family: Helvetica Neue;
+				font-size: 20;
+				font-weight: bold;
+				font-style: italic;
+				/*text-shadow: 2px 2px #ff0000;*/
+				text-decoration: underline;
+			}
+
+			#Part1{
+				margin-left: 100px;
+				margin-right:100px;
+				font-family: Helvetica Neue;
+			}
+
+			path.line{
+				clip-path: url(#clip);
+				fill: none;
+				stroke: #000;
+				stroke-width: 1.5;
+			}
+
+			.uhf_title{
+				text-anchor:middle;
+				font-size:20pt;
+				font-family:'Lucida Console';
+				font-weight:bold;
+				fill: rgb(54,69,79);
+			}
+
+			.page_title{
+				text-anchor:middle;
+				font-size:24pt;
+				font-family:'Lucida Console';
+				font-weight:bold;
+				font-style: italic;
+				text-decoration-line: underline;
+				stroke: rgba(54,69,79, 0.5);
+				fill: rgb(54,69,79);
+
+			}
+
+
+			html, body{
+				margin: 0;
+				max-height: 100%;
+				overflow: hidden;
+				padding-bottom: 0px
+			}
+
+		</style>
+	</head>
+	<body>
+		<!-- <h3 id="nyc_title"> Murders in NYC from 2006-2016 </h3> -->
+		<div id="background">
+    	<div id="nyc_map"></div>
+		</div>
+		<br>
+    <!-- <div id="brushTimeLine"></div> -->
+		<script type="text/javascript">
+
+			var scale_whole = 750*window.innerHeight;
+
+			//Width and height of map
+			var w_map = .85*window.innerWidth;
+			var h_map = window.innerHeight;
+			var padding_title=0.05*window.innerHeight;
+			var padding_map = 0.1*window.innerHeight;
+
+			var x_box = 0.33*window.innerWidth;
+			var y_box = 0.25*window.innerHeight;
+			var w_box = 0.5*window.innerWidth;
+			var h_box = 0.25*window.innerHeight;
+
+			var xScale, yScale, xAxis, yAxis, line;
+
+      var projection = d3.geoMercator()
+                      .center([-74.0029,40.7356])
+                      .translate([w_map/5, .4*h_map])
+                      .scale([scale_whole]);
+
+			//Define path generator, using the Albers USA projection
+			var path = d3.geoPath()
+				 		 .projection(projection);
+
+			var color = d3.scaleQuantize()
+					.range(["rgb(237,248,233)","rgb(186,228,179)",
+					"rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+
+
+
+			var nycmap_svg = d3.select("#nyc_map")
+						.append("svg")
+						.attr("width", w_map)
+						.attr("height", h_map);
+
+			// var boxplot = nycmap_svg.append('rect')
+      //   .attr('id', 'boxplot')
+      //   .attr('x', x_box)
+			// 	.attr('y', y_box)
+      //   .attr('width', w_box)
+      //   .attr('height', h_box)
+			// 	.attr('fill', 'rgb(255,0,0)');
+
+
+			// d3 functions for parsing dates and times
+      var parseDate = d3.timeParse("%x");
+      var parseTime = d3.timeParse("%H");
+			var reparseDate = d3.timeParse("%a %b %d, %Y")
+
+			var parseDateTime = d3.timeParse("%x %X")
+			//For converting Dates to strings
+			var formatTime = d3.timeFormat("%Y");
+
+      //Row converter for murder data
+      var rowConverter = function(data){
+        return{
+            Indicator: parseFloat(data.indicator_id),
+						Pollutant: data.name,
+						Measure: data.Measure,
+						uhf_id: parseFloat(data.geo_entity_id),
+						uhf_name: data.geo_entity_name,
+						Year: data.year_description,
+						Amount: parseFloat(data.data_valuemessage),
+
+        };
+      }
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///// geo json
+////////////////////////////////////////////////////////////////////////////////
+		//Load in taxi data
+		d3.csv("UHF_Air_Quality.csv", rowConverter, function(error, data) {
+							// check for errors in data
+							if (error && error.target.status === 404) { console.log("File not found");}
+							if(data.length == 0){ console.log("File empty");}
+
+
+							//console.log(one_pollutant);
+							//Set input domain for color scale
+							// color.domain([
+							// 	d3.min(one_pollutant, function(d) { return d.Amount; }),
+							// 	d3.max(one_pollutant, function(d) { return d.Amount; })
+							// ]);
+
+							//Load in GeoJSON data
+							//////////////////////////////////////////////////////////////////
+			  			d3.json("uhf42.geojson", function(json) {
+								var all_aq_data = data;
+								var one_neigh = all_aq_data.filter(function(d){
+																								return d.uhf_id == 308;
+																						});
+								console.log(one_neigh);
+								var drawingData = json.features;
+								//Draw just one neighborhood
+								for(i in json.features){
+									// console.log(json.features[i])
+									if(json.features[i].properties.uhfcode == 308){
+											drawingData = [json.features[i]];
+											break;
+										}
+
+								}
+								//end for loop
+								// console.log(drawingData);
+								// console.log(json.features);
+			  				//Bind data and create one path per GeoJSON feature
+			  				nycmap_svg.selectAll("path")
+			  				   .data(drawingData)
+			  				   .enter()
+			  				   .append("path")
+			  				   .attr("d", path)
+									 .attr("stroke-width", 3)
+									 .attr("stroke", "rgb(54,69,79)")
+			             .attr("fill", "rgb(51, 153, 255)");
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////// INCLUDE TEXT? LOOKS MESSY
+////////////////////////////////////////////////////////////////////////////////
+
+
+						 nycmap_svg.selectAll("text")
+						 					.data(drawingData)
+											.enter()
+											.append("text")
+											.attr('class','uhf_title')
+											.text(function(d){
+														if(d.properties.uhf_neigh){
+															return d.properties.uhf_neigh.toUpperCase();
+														}
+											})
+											.attr('x', w_map/2)
+											.attr('y', padding_map);
+
+						nycmap_svg.append("text")
+										 .attr('class','page_title')
+										 .text('Air Quality in UHF42 Neighborhoods')
+										 .attr('x', w_map/2)
+										 .attr('y', padding_title);
+
+					//////////////////////////////////////////////////////////////////////
+					});
+					// end of csv loading
+
+
+        });
+				// end of json loading
+
+
+
+
+
+
+		</script>
+	</body>
+</html>
