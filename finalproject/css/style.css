@@ -45,8 +45,6 @@ h2 {
   text-transform: uppercase;
   align-items: center;
   justify-content: center;
-  letter-spacing: 0.075em;
-  font-weight: 900;
   color: black;
 }
 
@@ -83,8 +81,24 @@ header.major {
 }
 
 .question{
+  margin-left: 30px;
   color: grey;
   font-style: italic;
+}
+
+.mainTitle{
+  color: #212931;
+  font-style: italic;
+  font-weight: 900;
+}
+
+.subTitle{
+  color: #212931;
+  text-transform: uppercase;
+  font-size: 24px;
+  margin-left: 20px;
+  font-style: italic;
+  font-weight:900;
 }
 
 .answer {
@@ -92,7 +106,8 @@ header.major {
   list-style: none;
   margin-top: 10px;
   margin-bottom: 10px;
-  margin-left: 15px;
+  margin-left: 30px;
+  margin-right:30px
 }
 
 .centerHead{
@@ -149,6 +164,10 @@ header.major {
 .btn-secondary{
   font-family: "Source Sans Pro", Helvetica, sans-serif;
   font-size: 12px;
+}
+
+.blackFont{
+  color:black;
 }
 
 .btn-secondary.active{
