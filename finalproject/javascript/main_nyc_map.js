@@ -1,6 +1,11 @@
 //Width and height of map
-var w_map = .8 * window.innerWidth;
-var h_map = window.innerHeight;
+
+
+//document.getElementById("mydiv").offsetWidth
+
+
+var w_map = document.getElementById("nyc_map").offsetWidth;
+var h_map = window.innerHeight * (3 / 4);
 var padding_map = .05 * window.innerHeight;
 var padding_m = 10;
 
@@ -22,6 +27,8 @@ var showAsian = false;
 var showNative = false;
 var showHispanic = false;
 var showAll = false;
+var showOther = false;
+var showCircle = true;
 
 var frisk_data,
   friskByTime;
@@ -29,7 +36,7 @@ var frisk_data,
 
 var projection = d3.geoMercator()
   .center([-73.9352, 40.7128])
-  .translate([(w_map / 3), (2 * h_map / 5)])
+  .translate([(w_map / 2), ((h_map - padding_map) / 2)])
   .scale([scale_whole]);
 
 //Define path generator, using the Albers USA projection
@@ -187,180 +194,182 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       })
       .attr("r", 1.5)
       .attr("stroke", "black")
-      .attr("stroke-width", 0.25)
-      .attr("fill", "#f8f8ff");
-      // .attr("class", function(d) {
-      //
-      //   if (isBrushed(parseTime("20:00"),
-      //       parseTime("23:59"), d.time)) {
-      //     return "brushed";
-      //   } else {
-      //     return "nonbrushed";
-      //   }
-      // });
-      // END OF CIRCLE DRAWING
+      .attr("stroke-width", 0.15)
+      .attr("fill", "rbga(0,0,0,0)");
+
+    initialView();
+    // .attr("class", function(d) {
+    //
+    //   if (isBrushed(parseTime("20:00"),
+    //       parseTime("23:59"), d.time)) {
+    //     return "brushed";
+    //   } else {
+    //     return "nonbrushed";
+    //   }
+    // });
+    // END OF CIRCLE DRAWING
 
 
-      // //////////////////////////////////////////////////////////////////////
-      // // Graph for Brushing
-      // //////////////////////////////////////////////////////////////////////
-      // //Discover start and end dates in dataset
-      // var startTime = d3.min(friskByTime, function(d) {
-      //   return parseTime(d.key);
-      // });
-      // var endTime = d3.max(friskByTime, function(d) {
-      //   return parseTime(d.key);
-      // });
-      //
-      // //Create scale functions
-      // xScale = d3.scaleTime()
-      //   .domain([
-      //     startTime, //startDate minus one day, for padding
-      //     endTime //endDate plus one day, for padding
-      //
-      //   ])
-      //   .rangeRound([padding_t, w_t - padding_t]);
-      //
-      //
-      // yScale = d3.scaleLinear()
-      //   .domain([0, d3.max(friskByTime, function(d) {
-      //     return d.value;
-      //   })])
-      //   .rangeRound([h_t - padding_t, padding_t]);
-      //
-      // //Define axes
-      // xAxis = d3.axisBottom()
-      //   .scale(xScale)
-      //   .ticks(10)
-      //   .tickFormat(formatTimeClock);
-      //
-      // //Define Y axis
-      // yAxis = d3.axisLeft()
-      //   .scale(yScale)
-      //   .ticks(10);
-      //
-      // // text label for the x axis
-      // timeline_svg.append("text")
-      //   .attr("transform",
-      //     "translate(" + (w_t / 2) + " ," +
-      //     (h_t) + ")")
-      //   .style("text-anchor", "middle")
-      //   .attr("font-size", 12)
-      //   .attr("font-family", "Helvetica Neue")
-      //   .attr("font-weight", "bold")
-      //   .text("Time");
-      //
-      // // text label for the y axis
-      // timeline_svg.append("text")
-      //   .attr("transform", "rotate(-90)")
-      //   .attr("y", padding_t / 2.5)
-      //   .attr("x", (0 - (h_t / 2)))
-      //   .style("text-anchor", "middle")
-      //   .attr("font-size", 12)
-      //   .attr("font-family", "Helvetica Neue")
-      //   .attr("font-weight", "bold")
-      //   .text("# Stopped");
-      //
-      //
-      // line = d3.line()
-      //   .x(function(d) {
-      //     return xScale(d.key);
-      //   })
-      //   .y(function(d) {
-      //     return yScale((d.value));
-      //   });
-      //
-      // //Create line
-      // timeline_svg.append("path")
-      //   .datum(friskByTime)
-      //   .attr("class", "line")
-      //   .attr("d", line)
-      //   //.attr("fill", "none")
-      //   // .attr("stroke-linejoin", "round")
-      //   .attr("stroke-linecap", "round")
-      //   //.attr("stroke", "rgb(25,76,35)")
-      //   .attr("stroke-width", 2.5);
-      //
-      //
-      //
-      // //Create axes
-      // timeline_svg.append("g")
-      //   .attr("class", "axis")
-      //   .attr("transform", "translate(0," + (h_t - padding_t) + ")")
-      //   .call(xAxis);
-      //
-      // timeline_svg.append("g")
-      //   .attr("class", "axis")
-      //   .attr("transform", "translate(" + padding_t + ",0)")
-      //   .call(yAxis);
-      //
-      //
-      //
-      //
-      // ////////////////////////////////////////////////////////////////////
-      //   // Brush functions
-      //   ////////////////////////////////////////////////////////////////////
-      //
-      //
-      // var brush = d3.brushX(xScale)
-      //   .on("brush end", highlightBrushedCircles);
-      //
-      //
-      //
-      // var g = timeline_svg.append("g")
-      //   .attr("height", (h_t - (2 * padding_t)))
-      //   .attr("transform", "translate(" + 0 + "," + padding_t + ")");
-      //
-      //
-      // var gBrush = g.append("g")
-      //   .attr("class", "brush")
-      //   .call(brush);
-      //
-      // gBrush.call(brush.move, [xScale(parseTime("20:00:00")), xScale(parseTime("23:59:00"))]);
-      //
-      //
-      //
-      //
-      //
-      //
-      //
-      // function highlightBrushedCircles() {
-      //   // revert circles to initial style
-      //   nycmap_svg.selectAll("circle").classed("brushed", false);
-      //   nycmap_svg.selectAll("circle").attr("class", "nonbrushed");
-      //
-      //
-      //   var maxTime = xScale.invert(d3.event.selection[1]);
-      //   var minTime = xScale.invert(d3.event.selection[0]);
-      //
-      //
-      //   // style brushed circles
-      //   nycmap_svg.selectAll("circle").filter(function(d) {
-      //     var currTime = d.time;
-      //     return isBrushed(parseDate(minTime), parseDate(maxTime), currTime);
-      //   })
-      //     .classed("brushed", true);
-      // }
-      //
-      //
-      //
-      //
-      // function isBrushed(firstTime, lastTime, currentTime) {
-      //   console.log(firstTime);
-      //   console.log(currentTime);
-      //   console.log(lastTime);
-      //
-      //   if ((d3.max([firstTime, currentTime]) === currentTime)
-      //     && (d3.min([lastTime, currentTime]) === currentTime)) {
-      //     return true;
-      //   } else {
-      //     return false;
-      //   }
-      // }
-      //
-      //
-      //
-      // //////////////////////////////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////////
+    // // Graph for Brushing
+    // //////////////////////////////////////////////////////////////////////
+    // //Discover start and end dates in dataset
+    // var startTime = d3.min(friskByTime, function(d) {
+    //   return parseTime(d.key);
+    // });
+    // var endTime = d3.max(friskByTime, function(d) {
+    //   return parseTime(d.key);
+    // });
+    //
+    // //Create scale functions
+    // xScale = d3.scaleTime()
+    //   .domain([
+    //     startTime, //startDate minus one day, for padding
+    //     endTime //endDate plus one day, for padding
+    //
+    //   ])
+    //   .rangeRound([padding_t, w_t - padding_t]);
+    //
+    //
+    // yScale = d3.scaleLinear()
+    //   .domain([0, d3.max(friskByTime, function(d) {
+    //     return d.value;
+    //   })])
+    //   .rangeRound([h_t - padding_t, padding_t]);
+    //
+    // //Define axes
+    // xAxis = d3.axisBottom()
+    //   .scale(xScale)
+    //   .ticks(10)
+    //   .tickFormat(formatTimeClock);
+    //
+    // //Define Y axis
+    // yAxis = d3.axisLeft()
+    //   .scale(yScale)
+    //   .ticks(10);
+    //
+    // // text label for the x axis
+    // timeline_svg.append("text")
+    //   .attr("transform",
+    //     "translate(" + (w_t / 2) + " ," +
+    //     (h_t) + ")")
+    //   .style("text-anchor", "middle")
+    //   .attr("font-size", 12)
+    //   .attr("font-family", "Helvetica Neue")
+    //   .attr("font-weight", "bold")
+    //   .text("Time");
+    //
+    // // text label for the y axis
+    // timeline_svg.append("text")
+    //   .attr("transform", "rotate(-90)")
+    //   .attr("y", padding_t / 2.5)
+    //   .attr("x", (0 - (h_t / 2)))
+    //   .style("text-anchor", "middle")
+    //   .attr("font-size", 12)
+    //   .attr("font-family", "Helvetica Neue")
+    //   .attr("font-weight", "bold")
+    //   .text("# Stopped");
+    //
+    //
+    // line = d3.line()
+    //   .x(function(d) {
+    //     return xScale(d.key);
+    //   })
+    //   .y(function(d) {
+    //     return yScale((d.value));
+    //   });
+    //
+    // //Create line
+    // timeline_svg.append("path")
+    //   .datum(friskByTime)
+    //   .attr("class", "line")
+    //   .attr("d", line)
+    //   //.attr("fill", "none")
+    //   // .attr("stroke-linejoin", "round")
+    //   .attr("stroke-linecap", "round")
+    //   //.attr("stroke", "rgb(25,76,35)")
+    //   .attr("stroke-width", 2.5);
+    //
+    //
+    //
+    // //Create axes
+    // timeline_svg.append("g")
+    //   .attr("class", "axis")
+    //   .attr("transform", "translate(0," + (h_t - padding_t) + ")")
+    //   .call(xAxis);
+    //
+    // timeline_svg.append("g")
+    //   .attr("class", "axis")
+    //   .attr("transform", "translate(" + padding_t + ",0)")
+    //   .call(yAxis);
+    //
+    //
+    //
+    //
+    // ////////////////////////////////////////////////////////////////////
+    //   // Brush functions
+    //   ////////////////////////////////////////////////////////////////////
+    //
+    //
+    // var brush = d3.brushX(xScale)
+    //   .on("brush end", highlightBrushedCircles);
+    //
+    //
+    //
+    // var g = timeline_svg.append("g")
+    //   .attr("height", (h_t - (2 * padding_t)))
+    //   .attr("transform", "translate(" + 0 + "," + padding_t + ")");
+    //
+    //
+    // var gBrush = g.append("g")
+    //   .attr("class", "brush")
+    //   .call(brush);
+    //
+    // gBrush.call(brush.move, [xScale(parseTime("20:00:00")), xScale(parseTime("23:59:00"))]);
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    // function highlightBrushedCircles() {
+    //   // revert circles to initial style
+    //   nycmap_svg.selectAll("circle").classed("brushed", false);
+    //   nycmap_svg.selectAll("circle").attr("class", "nonbrushed");
+    //
+    //
+    //   var maxTime = xScale.invert(d3.event.selection[1]);
+    //   var minTime = xScale.invert(d3.event.selection[0]);
+    //
+    //
+    //   // style brushed circles
+    //   nycmap_svg.selectAll("circle").filter(function(d) {
+    //     var currTime = d.time;
+    //     return isBrushed(parseDate(minTime), parseDate(maxTime), currTime);
+    //   })
+    //     .classed("brushed", true);
+    // }
+    //
+    //
+    //
+    //
+    // function isBrushed(firstTime, lastTime, currentTime) {
+    //   console.log(firstTime);
+    //   console.log(currentTime);
+    //   console.log(lastTime);
+    //
+    //   if ((d3.max([firstTime, currentTime]) === currentTime)
+    //     && (d3.min([lastTime, currentTime]) === currentTime)) {
+    //     return true;
+    //   } else {
+    //     return false;
+    //   }
+    // }
+    //
+    //
+    //
+    // //////////////////////////////////////////////////////////////////////
 
 
 
@@ -394,50 +403,59 @@ d3.selectAll('button.nyc_map')
         if (showWhite) {
           showWhite = false;
         } else {
-          showWhite = true
+          showWhite = true;
         }
         break;
       case 'blackButton':
         if (showBlack) {
           showBlack = false;
         } else {
-          showBlack = true
+          showBlack = true;
         }
         break;
       case 'asianButton':
         if (showAsian) {
           showAsian = false;
         } else {
-          showAsian = true
+          showAsian = true;
         }
         break;
       case 'nativeButton':
         if (showNative) {
           showNative = false;
         } else {
-          showNative = true
+          showNative = true;
         }
         break;
       case 'hispanicButton':
         if (showHispanic) {
           showHispanic = false;
         } else {
-          showHispanic = true
+          showHispanic = true;
+        }
+        break;
+      case 'otherButton':
+        if (showOther) {
+          showOther = false;
+        } else {
+          showOther = true;
         }
         break;
       case 'allButton':
         var showButton = window.parent.document.getElementById('allButton');
         if (showAll) {
-          showButton.innerHTML = 'Show All'
+          showButton.innerHTML = 'Show All';
           showAll = false;
           showHispanic = false;
           showBlack = false;
           showWhite = false;
           showAsian = false;
           showNative = false;
+          setOtherButtons(false);
         } else {
-          showButton.innerHTML = 'Reset'
+          showButton.innerHTML = 'Reset';
           showAll = true;
+          setOtherButtons(true);
         }
         break;
       default:
@@ -450,11 +468,52 @@ d3.selectAll('button.nyc_map')
   // END OF ON CLICK
 
 
+var initialView = function() {
+  var showButton = window.parent.document.getElementById('allButton');
+  showButton.innerHTML = 'Reset';
+  showAll = true;
+  setOtherButtons(true);
+  update_circles_color();
+}
+var setOtherButtons = function(disabled) {
+  $('#hispanicButton').prop('disabled', disabled);
+  $('#otherButton').prop('disabled', disabled);
+  $('#whiteButton').prop('disabled', disabled);
+  $('#blackButton').prop('disabled', disabled);
+  $('#asianButton').prop('disabled', disabled);
+  $('#nativeButton').prop('disabled', disabled);
+}
+
+
+
 // UPDATE circles
 var update_circles_color = function() {
 
   d3.selectAll("#nyc_map circle")
-    .attr("fill", function(d) {
+    .attr("stroke", function(d) {
+      if ((showAll || showBlack) && (d.race == "B")) {
+        // BLACK
+        return "#000000"
+      } else if ((showAll || showWhite) && (d.race == "W")) {
+        // WHITE
+        return "#000000"
+      } else if ((showAll || showAsian) && (d.race == "A")) {
+        // ASIAN
+        return "#000000"
+      } else if ((showAll || showNative) && (d.race == "I")) {
+        // NATIVE AMERICAN
+        return "#000000"
+      } else if ((showAll || showHispanic) && (d.race == "P" || d.race == "Q")) {
+        // HISPANIC
+        return "#000000"
+      } else if ((showAll || showOther) && (d.race == "X" || d.race == "Z")) {
+        // UNKNOWN/OTHER
+        return "#000000"
+      } else {
+        return "rgba(0,0,0,0)"
+      }
+    })
+    .attr("fill", function(d, i) {
       if ((showAll || showBlack) && (d.race == "B")) {
         // BLACK
         return "#b22222"
@@ -470,10 +529,16 @@ var update_circles_color = function() {
       } else if ((showAll || showHispanic) && (d.race == "P" || d.race == "Q")) {
         // HISPANIC
         return "#FFA500"
+      } else if ((showAll || showOther) && (d.race == "X" || d.race == "Z")) {
+        // HISPANIC
+        return "#000000"
       } else {
-        return "#f8f8ff"
+        return "rgba(0,0,0,0)"
       }
-    })
-    .transition()
-    .duration();
+    });
+
+
+
+
+
 }

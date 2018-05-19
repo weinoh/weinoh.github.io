@@ -17,32 +17,78 @@
 							&nbsp;
 						</div>
 
+
 						<!-- Main -->
 				    <div id="main" class="col-md-12">
 								<div class="row m-b-10">
 										<div class="col-md-12">
 											<br>
-												<h2>Stop and Frisk in New York City</h2>
-												<p>We found that the breakdown of the demographic of stop and frisk was as follows: 54% Black, 29% Latino, 11% White, 9% other. The overall population of New York City  was 45% White, 25% Black, 27% Latino, 3% other. There is a huge discrepancy, especially in Black residents of New York City, in the percentage of a given race in the city and the frequency that that race got stopped by officers. While only about a quarter of the population is Black, they represent over half of all people who are frisked. Below is a relevant article to show the further effects of the Stop and Frisk Policy in New York City</p>
-												<a href="http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective">http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective</a>
-
+												<h2 class="question centerHead">Stop and Frisk in New York City</h2>
 												<br>
-																	<div class="row m-b-10 cont" style="margin-top: 75px;">
-																			<span class="dot black"></span>
-																			<button type="button" id="blackButton" class="nyc_map btn btn-secondary m-b-10">Black</button>
-																			<span class="dot white"></span>
-																			<button type="button" id="whiteButton" class="nyc_map btn btn-secondary m-b-10">White</button>
-																			<span class="dot asian"></span>
-																			<button type="button" id="asianButton" class="nyc_map btn btn-secondary m-b-10">Asian/Pacific Islander</button>
-																			<span class="dot native"></span>
-																			<button type="button" id="nativeButton" class="nyc_map btn btn-secondary m-b-10">American Indian/Alaskan Native</button>
-																			<span class="dot hispanic"></span>
-																			<button type="button" id="hispanicButton" class="nyc_map btn btn-secondary m-b-10">Hispanic</button>
-																			<span class="dot"></span>
-																			<button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
+												<div class="row m-b-10 m-lr-20 answer">
+														<p>We found that the breakdown of the demographic of stop and frisk was as follows: 54% Black, 29% Latino, 11% White, 9% other. The overall population of New York City  was 45% White, 25% Black, 27% Latino, 3% other. There is a huge discrepancy, especially in Black residents of New York City, in the percentage of a given race in the city and the frequency that that race got stopped by officers. While only about a quarter of the population is Black, they represent over half of all people who are frisked. Below is a relevant article to show the further effects of the Stop and Frisk Policy in New York City</p>
+														<br>
+														<a href="http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective">http://www.msnbc.com/the-cycle/stop-and-frisk-racist-and-ineffective</a>
+											</div>
+									 </div>
+								</div>
+
+								<ul class="nav nav-tabs">
+									<li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+									<li><a data-toggle="tab" href="#">Menu 1</a></li>
+									<li><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+									<li><a data-toggle="tab" href="#menu3">Menu 3</a></li>
+								</ul>
+												<br>
+
+												<div class="tab-content">
+							<div id="home" class="tab-pane fade in active">
+							</div>
+							<div id="menu1" class="tab-pane fade">
+
+							</div>
+							<div id="menu2" class="tab-pane fade">
+							</div>
+</div>
+																	<div class="row m-b-30">
+																			<div class="col-md-9 centerButtons">
+																					<!-- <span class="dot black"></span> -->
+																					<button type="button" id="blackButton" class="nyc_map btn btn-secondary black m-b-10">African American</button>
+
+																					<!-- <span class="dot white"></span> -->
+																					<button type="button" id="whiteButton" class="nyc_map btn btn-secondary white m-b-10">Caucasian</button>
+
+																					<!-- <span class="dot asian"></span> -->
+																					<button type="button" id="asianButton" class="nyc_map btn btn-secondary asian m-b-10">Asian/Pacific Islander</button>
+
+																					<!-- <span class="dot native"></span> -->
+																					<button type="button" id="nativeButton" class="nyc_map btn btn-secondary native m-b-10">American Indian/Alaskan Native</button>
+
+																					<!-- <span class="dot hispanic"></span> -->
+																					<button type="button" id="hispanicButton" class="nyc_map btn btn-secondary hispanic m-b-10">Hispanic</button>
+																					<button type="button" id="otherButton" class="nyc_map btn btn-secondary other m-b-10">Unknown/Other</button>
+
+																					<!-- <span class="dot"></span> -->
+																					<button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
+																			</div>
+																			<div class="col-md-3"></div>
 																	</div>
-																	<div id="nyc_map" class="col-md-10"></div>
-																	<!-- <div id="timeline" class="col-md-10"></div> -->
+																	<!-- END ROW FOR BUTTONS, BEGIN ROW FOR NYC MAP -->
+																<div class="container-fluid">
+																	<div class="row m-b-30 h-100" >
+
+																		<div id="nyc_map" class="col-md-9"></div>
+																		<div class="col-md-3">
+																			<div id="timeline" class="col-md-10"></div>
+																		</div>
+																	</div>
+																</div>
+																	<!-- <div class="row">
+																		<div class="col-md-1"></div>
+																		<div id="timeline" class="col-md-10"></div>
+																		<div class="col-md-1"></div>
+																	</div> -->
+
 																	<div class="invisible" id="tooltip">
 										                <h6>Zip Code</h6>
 										                <p><span id="value"></span></p>
@@ -52,8 +98,8 @@
 
 
 
-										</div>
-								</div>
+
+
 						</div>
 
 		    <!-- <div id="brushTimeLine"></div> -->

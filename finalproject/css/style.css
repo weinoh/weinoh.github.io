@@ -57,12 +57,29 @@ header.major {
 
 /* Styling helpers */
 
+.m-t-30 {
+  margin-top: 30px;
+}
+
+.m-l-20 {
+  margin-left: 10px;
+}
+
 .m-b-10 {
   margin-bottom: 10px;
 }
 
 .m-b-20 {
   margin-bottom: 20px;
+}
+
+.m-b-30{
+  margin-bottom: 30px;
+}
+
+.m-lr-20 {
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .question{
@@ -76,6 +93,11 @@ header.major {
   margin-top: 10px;
   margin-bottom: 10px;
   margin-left: 15px;
+}
+
+.centerHead{
+  align-items: center;
+  justify-content: center;
 }
 
 #nyc_map{
@@ -93,11 +115,11 @@ header.major {
 }
 
 #nyc_map path:hover {
-  fill: orange;
+  fill: rgba(0, 0, 0, 0.6);
 }
 
-#nyc_map path:hover {
-  fill: orange;
+#nyc_map path:active {
+  fill: rgba(0, 0, 0, 0.6);
 }
 
 #tooltip {
@@ -123,31 +145,45 @@ header.major {
   line-height: 20px;
 }
 
-.dot {
-  height: 15px;
-  width: 15px;
-  border-radius: 50%;
-  display: inline-block;
+/* BUTTONS */
+.btn-secondary{
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 12px;
 }
 
-.black {
-  background-color: #b22222;
+.btn-secondary.active{
+  color:white;
 }
 
-.asian {
-  background-color: #00ff2b;
+.btn-secondary.black {
+	background-color: #b22222;
+	border-color: #b22222;
+}
+.btn-secondary.asian {
+	background-color: #00ff2b;
+	border-color: #00ff2b;
+}
+.btn-secondary.white {
+	background-color: #00ffec;
+	border-color: #00ffec;
+}
+.btn-secondary.native {
+	background-color: #ff69b4;
+	border-color: #ff69b4;
+}
+.btn-secondary.hispanic {
+	background-color: #FFA500;
+	border-color: #FFA500;
+}
+.btn-secondary.other {
+	background-color: #000000;
+	border-color: #000000;
 }
 
-.white {
-  background-color: #00ffec;
-}
-
-.native {
-  background-color: #ff69b4;
-}
-
-.hispanic {
-  background-color: #FFA500;
+.centerButtons{
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .grid line {
@@ -160,23 +196,6 @@ header.major {
   stroke-width: 0;
 }
 
-
-.cont{
-    margin-left: 30px;
-    justify-content: center;
-    align-content: center;
-    align-self: center;
-    height:30px;
-    line-height:30px;
-    display: inline-table;
-    align-items: center;
-}
-.button{
-    background:#F00;
-    font-size: 12px;
-    display: table-cell;
-    font-family: "Source Sans Pro", Helvetica, sans-serif;
-}
 
 .brush{
   opacity: .3;
