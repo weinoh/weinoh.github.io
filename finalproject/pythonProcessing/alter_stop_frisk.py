@@ -48,15 +48,12 @@ df = df.drop(columns = ['year','pct','ser_num', 'inout','trhsloc',
                         'post','dettypCM','lineCM','pf_hands','pf_wall','pf_grnd',
                         'pf_drwep','pf_ptwep','pf_baton','pf_hcuff','pf_pepsp',
                         'pf_other','contrabn','pistol','riflshot','asltweap',
-                        'knifcuti','machgun','othrweap', 'othpers', 'perstop', 'crimsusp', 'recstat', 'arstoffn'])
+                        'knifcuti','machgun','othrweap', 'othpers', 'perstop',
+                        'crimsusp', 'recstat', 'arstoffn', 'zip'])
 
 
-# zip_data = pd.read_csv('file_1526308161195.csv')
-# getZip_df = pd.DataFrame(zip_data, columns = ['Latitude','Longitude','Address','street_num','Street','City','State','Country','Zip','address_comp'])
 
-# print(getZip_df['Zip'])
-#
-# df['zip'] = getZip_df['Zip']
+df['timestop'] = df['timestop'].astype(str)
 #Get rid of whitespace and rows with invalid values in coordinates
 df['xcoord'] = df['xcoord'].str.replace(" ","")
 df['ycoord'] = df['ycoord'].str.replace(" ","")
@@ -66,18 +63,9 @@ df = df[pd.notnull(df['xcoord'])]
 df = df[pd.notnull(df['ycoord'])]
 df = df[df['xcoord'] != '']
 df = df[df['ycoord'] != '']
-
-#Get rid of whitespace for all other rows
-#df['datestop'] = df['datestop'].str.replace(" ","")
-#df['datestop'] = df['datestop'].str.strip()
-#df['timestop'] = df['timestop'].str.replace(" ","")
-#df['timestop'] = df['timestop'].str.strip()
-# df['recstat'] = df['recstat'].str.replace(" ","")
-# df['recstat'] = df['recstat'].str.strip()
+# Get rid of whitespace for string values
 df['arstmade'] = df['arstmade'].str.replace(" ","")
 df['arstmade'] = df['arstmade'].str.strip()
-#df['arstoffn'] = df['arstoffn'].str.replace(" ","")
-#df['arstoffn'] = df['arstoffn'].str.strip()
 df['frisked'] = df['frisked'].str.replace(" ","")
 df['frisked'] = df['frisked'].str.strip()
 df['searched'] = df['searched'].str.replace(" ","")
@@ -88,16 +76,9 @@ df['sex'] = df['sex'].str.replace(" ","")
 df['sex'] = df['sex'].str.strip()
 df['race'] = df['race'].str.replace(" ","")
 df['race'] = df['race'].str.strip()
-#df['age'] = df['age'].str.replace(" ","")
-#df['age'] = df['age'].str.strip()
-#df['zip'] = df['zip'].str.replace(" ","")
-#df['zip'] = df['zip'].str.strip()
-#df['detailCM'] = df['detailCM'].str.replace(" ","")
-#df['detailCM'] = df['detailCM'].str.strip()
-
 #Remove duplicate records
 df_valid = df.drop_duplicates()
-
+df_valid = df_valid[df_valid['timestop'].str.len() > 2]
 #Iterate through each row and convert State Plane Coordinates to Lat/Long
 for index, row in df_valid.iterrows():
     x1,y1 = float(row['xcoord']), float(row['ycoord'])
@@ -111,37 +92,46 @@ for index, row in df_valid.iterrows():
     df_valid.at[index, 'xcoord'] = x2 #set_value(index,'xcoord',x2)
     df_valid.at[index, 'ycoord'] = y2 #set_value(index,'ycoord',y2)
     #print(str(y2) + ','+ str(x2))
+    #
+    # ALSO CONVERT TIME TO 4 VALUES
+    #print(len(str(row['timestop'])))
 
-print('iterated through everything')
+    if(len(df_valid.at[index, 'timestop']) == 3):
+        df_valid.at[index, 'timestop'] = '0' + row['timestop']
+
+
+
+
+
+
 
 #Rename columns to long/lat
 df_valid = df_valid.rename(index=str, columns={'xcoord': 'longitude', 'ycoord': 'latitude'})
 
-df_latlong = df_valid.drop(columns = ['datestop','timestop','arstmade',
-                                'frisked','searched','forceuse',
-                                'sex','race','age','zip','detailCM'])
 #Reformat Date
 df_valid['datestop'] = pd.to_datetime(df_valid['datestop'], format='%m%d%Y', errors='ignore')
 df_valid['timestop'] = pd.to_datetime(df_valid['timestop'], format='%H%M', errors='ignore')
 #df_valid['datestop'] = df_valid['datestop'].dt.strftime("%Y-%m-%d")
 #df_valid = df_valid.sort_values(['datestop'], ascending=True)
 
-df_valid['timestop'] = pd.strfdatetime(df_valid['timestop'], format='%H:%M', errors='ignore')
+#df_valid['timestop'] = pd.strfdatetime(df_valid['timestop'], format='%H:%M', errors='ignore')
+#reset index
+df_valid = df_valid.reset_index()
 
-#Create separate files for each race?? --> Just do this in Javascript file
-#df_black = df_valid[df_valid.race == 'B']
-#df_white = df_valid[df_valid.race == 'W']
-#df_white_hispanic = df_valid[df_valid.race == 'Q']
-#df_american_indian = df_valid[df_valid.race == 'I']
-#df_black_hispanic = df_valid[df_valid.race == 'P']
-#df_asian = df_valid[df_valid.race == 'A']
-#df_unknown = df_valid[df_valid.race == 'X']
-#df_other = df_valid[df_valid.race == 'Z']
+# GET ZIP CONVERTED FROM REVERSE GEOCODING
+zip_data = pd.read_csv('lat_long.csv')
+getZip_df = pd.DataFrame(zip_data, columns = ['index','longitude','latitude','Address','street_num','Street','City','State','Country','Zip','addr_comp'])
+getZip_df = getZip_df.drop(columns = ['index','longitude','latitude','Address','street_num','Street','City','State','Country','addr_comp'])
+zip_code_column = getZip_df['Zip']
 
-
-
-
+# MERGE ZIP CODE COLUMN WITH DF
+frames = [df_valid, getZip_df]
+df_valid = pd.concat(frames, axis=1)
+df_valid = df_valid.drop(columns = 'index')
+df_valid = df_valid.dropna(subset = ['longitude', 'latitude', 'Zip'])
+df_valid = df_valid.reset_index()
+df_valid = df_valid.drop(columns = 'index')
+print(df_valid)
 #Save to new location
 df_valid.to_csv('../csv/stop_frisk.csv')
-#df_latlong.to_csv('../csv/lat_long.csv')
-print("DONE SAVING TO CSV")
+print("DONE STOP FRISK SAVING TO CSV")

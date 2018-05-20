@@ -25,7 +25,8 @@
             <div class="row m-b-10">
                 <div class="col-md-12">
                     <br>
-                    <h2 class="mainTitle centerHead col-md-12">Stop and Frisk in New York City: Take a closer look.</h2>
+                    <br>
+                    <h2 class="mainTitle col-md-12 centerHead">Stop and Frisk in New York City: Take a closer look.</h2>
                     <br>
                     <div class="row m-b-10 m-lr-20 answer">
                         <p>New York is the largest and one of the most diverse cities in the United States, consisting of around 8.55 million residents. Because there is such an overwhelming number of people residing in New York City, there is a large number
@@ -61,25 +62,31 @@
                 <div class="tab-content col-md-12" id="myTabContent">
                     <div class="tab-pane fade show active" id="visualization" role="tabpanel" aria-labelledby="home-tab">
 
-                        <div class="row m-b-30">
-                            <div class="col-md-9 centerButtons">
-                                <button type="button" id="blackButton" class="nyc_map btn btn-secondary black m-b-10">African American</button>
-                                <button type="button" id="whiteButton" class="nyc_map btn btn-secondary white m-b-10">Caucasian</button>
-                                <button type="button" id="asianButton" class="nyc_map btn btn-secondary asian m-b-10">Asian/Pacific Islander</button>
-                                <button type="button" id="nativeButton" class="nyc_map btn btn-secondary native m-b-10">American Indian/Alaskan Native</button>
-                                <button type="button" id="hispanicButton" class="nyc_map btn btn-secondary hispanic m-b-10">Hispanic</button>
-                                <button type="button" id="otherButton" class="nyc_map btn btn-secondary other m-b-10">Unknown/Other</button>
-                                <button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
+                        <div class="row m-b-10">
+                            <div class="col-md-7 centerButtons">
+                                <div class="btn-group" role="group" aria-label="buttonGroup">
+                                    <button type="button" id="blackButton" class="nyc_map btn btn-secondary black m-b-10">African American</button>
+                                    <button type="button" id="whiteButton" class="nyc_map btn btn-secondary white m-b-10">Caucasian</button>
+                                    <button type="button" id="asianButton" class="nyc_map btn btn-secondary asian m-b-10">Asian/Pacific Islander</button>
+                                    <button type="button" id="nativeButton" class="nyc_map btn btn-secondary native m-b-10">American Indian/Alaskan Native</button>
+                                    <button type="button" id="hispanicButton" class="nyc_map btn btn-secondary hispanic m-b-10">Hispanic</button>
+                                    <button type="button" id="otherButton" class="nyc_map btn btn-secondary other m-b-10">Unknown/Other</button>
+                                    <button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
+                                </div>
                             </div>
-                            <div class="col-md-3"></div>
+                            <div class="col-md-5"></div>
+                        </div>
+                        <div class="row">
+                            <p class="question col-md-6 centerButtons" id="buttonDirections">
+                            </p>
+                            <div class="col-md-6"></div>
                         </div>
                         <!-- END ROW FOR BUTTONS, BEGIN ROW FOR NYC MAP -->
                         <!-- <div class="container-fluid"> -->
                         <div class="row m-b-30 h-100">
-
-                            <div id="nyc_map" class="col-md-9"></div>
-                            <div class="col-md-3">
-                                <div id="timeline" class="col-md-10"></div>
+                            <div id="nyc_map" class="col-md-7"></div>
+                            <div class="col-md-5">
+                                <div id="timeline" class="col-md-12"></div>
                             </div>
                         </div>
                         <!-- </div> -->
@@ -101,9 +108,9 @@
                         <h3 class="subTitle">Motivation</h3>
                         <br>
                         <h5 class="question">What is your dataset?</h5>
-                        <p class="answer">For this project, we chose two datasets to analyze. The first dataset chosen is the <a href="http://www1.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page">Stop, Question and Frisk Dataset</a>. This dataset was found in the
-                            New York Police Department (NYPD) section of The Official Website of the City of New York under ‘statistics’. The stop, question and frisk program is a practice established by the New York City Police Department (NYPD) that
-                            involves temporarily detaining, questioning, and searching civilians they deem a threat on the street for weapons and other contraband. The second dataset chosen is titled <a href="https://data.cityofnewyork.us/City-Government/Demographic-Statistics-By-Zip-Code/kku6-nxdu">Demographic Statistics by Zip Code</a>.
+                        <p class="answer">For this project, we chose two datasets to analyze. The first dataset chosen is the <a href="http://www1.nyc.gov/site/nypd/stats/reports-analysis/stopfrisk.page">2015 Stop, Question and Frisk Dataset</a>. This dataset was found
+                            in the New York Police Department (NYPD) section of The Official Website of the City of New York under ‘statistics’. The stop, question and frisk program is a practice established by the New York City Police Department (NYPD)
+                            that involves temporarily detaining, questioning, and searching civilians they deem a threat on the street for weapons and other contraband. The second dataset chosen is titled <a href="https://data.cityofnewyork.us/City-Government/Demographic-Statistics-By-Zip-Code/kku6-nxdu">Demographic Statistics by Zip Code</a>.
                             This dataset was found on NYC Open Data.
                         </p>
                         <br>
