@@ -63,23 +63,12 @@
 
                         <div class="row m-b-30">
                             <div class="col-md-9 centerButtons">
-                                <!-- <span class="dot black"></span> -->
                                 <button type="button" id="blackButton" class="nyc_map btn btn-secondary black m-b-10">African American</button>
-
-                                <!-- <span class="dot white"></span> -->
                                 <button type="button" id="whiteButton" class="nyc_map btn btn-secondary white m-b-10">Caucasian</button>
-
-                                <!-- <span class="dot asian"></span> -->
                                 <button type="button" id="asianButton" class="nyc_map btn btn-secondary asian m-b-10">Asian/Pacific Islander</button>
-
-                                <!-- <span class="dot native"></span> -->
                                 <button type="button" id="nativeButton" class="nyc_map btn btn-secondary native m-b-10">American Indian/Alaskan Native</button>
-
-                                <!-- <span class="dot hispanic"></span> -->
                                 <button type="button" id="hispanicButton" class="nyc_map btn btn-secondary hispanic m-b-10">Hispanic</button>
                                 <button type="button" id="otherButton" class="nyc_map btn btn-secondary other m-b-10">Unknown/Other</button>
-
-                                <!-- <span class="dot"></span> -->
                                 <button type="button" id="allButton" class="nyc_map btn btn-secondary m-b-10">Show All</button>
                             </div>
                             <div class="col-md-3"></div>
@@ -108,6 +97,7 @@
                         <br>
                     </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <br>
                         <h3 class="subTitle">Motivation</h3>
                         <br>
                         <h5 class="question">What is your dataset?</h5>
@@ -116,19 +106,38 @@
                             involves temporarily detaining, questioning, and searching civilians they deem a threat on the street for weapons and other contraband. The second dataset chosen is titled <a href="https://data.cityofnewyork.us/City-Government/Demographic-Statistics-By-Zip-Code/kku6-nxdu">Demographic Statistics by Zip Code</a>.
                             This dataset was found on NYC Open Data.
                         </p>
-												<br>
+                        <br>
                         <h5 class="question">Why did you choose this/these particular dataset(s)?</h5>
                         <p class="answer">The implementation of the stop, question and frisk procedure by the Police Department in New York has always been incredibly controversial. There are some that claim this procedure has made many neighborhoods in NYC much safer,
                             however there are others that accuse the NYPD of targeting individuals of color and other minorities. This controversy is something that has always been of interest to us, so we wanted to take the analysis a step further and
                             see how effective the practice really is in catching criminals. By comparing the stop, question and frisk dataset with the dataset of demographic Statistics by Zip Codes, we will be able to get a better look at if an individual’s
                             race plays a role in the NYPD’s enforcement of stop, question and frisk.
                         </p>
-												<br>
+                        <br>
                         <h5 class="question">What was your goal for the end user’s experience?</h5>
                         <p class="answer">The end goal is for the user to easily see whether or not race is a factor in a police officer’s decision to stop, question and frisk a person in each postal code in New York City. Our visualizations allow the user to click on
                             any district in New York City to see both a scatter plot of stop and frisk encounters classified by race and two donut graphs. One graph shows the area’s breakdown of demographic of the overall population while the other shows
                             the area’s breakdown of demographic of stop and frisk encounters. These visualizations will make it easier to see if there is a large difference between who lives in New York and who is getting stopped in New York.
                         </p>
+                        <br>
+                        <br>
+                        <h3 class="subTitle">Basic Stats</h3>
+                        <br>
+                        <h5 class="question">Write about your choices in data cleaning and preprocessing:</h5>
+                        <p class="answer">There were many of aspects of the stop and frisk data set that we did not need or needed to change. Data like whether the suspect was cuffed, their height and whether they were verbally aggressive was not needed, and those columns
+                            were removed. The data set gave us the position of the frisking using NYC’s data geocoding system. This corresponds to state plane coordinates which we could not use in visualizations. In order to use these numbers we had to
+                            pass the numbers through a function we made that translated the coordinates into longitudes and latitudes which we could then project onto a map in d3. We also had to reformat some of the dataset to remove white space and drop
+                            duplicate data.
+                        </p>
+                        <br>
+                        <h5 class="question">Write a short section that discusses the dataset stats, containing key points/plots from your exploratory data analysis.</h5>
+                        <p class="answer">Our dataset started 7.2 MB with 22561 rows. After cleaning and preprocessing we cut it to 1.6 MB with 21075 rows. We found that the breakdown of the demographic of stop and frisk was as follows: 54% Black, 29% Latino, 11% White,
+                            9% other. The overall population of New York City was 45% White, 25% Black, 27% Latino, 3% other. There is a huge discrepancy, especially in Black residents of New York City, in the percentage of a given race in the city and
+                            the frequency that that race got stopped by officers. While only about a quarter of the population is Black, they represent over half of all people who are frisked.
+
+                        </p>
+                        <br>
+
 
 
                     </div>
