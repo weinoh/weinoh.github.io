@@ -110,6 +110,13 @@ header.major {
   margin-right:30px
 }
 
+.subtext{
+  margin-left: 30px;
+  color: grey;
+  font-style: italic;
+  font-size: 12px;
+}
+
 .centerHead{
   align-items: center;
   justify-content: center;
@@ -230,6 +237,5 @@ header.major {
 }
 
 .bar {
-  fill: steelblue;
   shape-rendering: auto;
 }

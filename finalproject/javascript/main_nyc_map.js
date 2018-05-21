@@ -48,13 +48,23 @@ var timeline_svg = d3.select("#timeline")
   .append("svg")
   .attr("width", w_t)
   .attr("height", h_t);
+var timeColorScale = d3.scaleOrdinal()
+  .range(["#b22222", "#00ffec", "#00ff2b", "#FFA500", "#ff69b4", "#000000"]);
+
 // Graphing variables, timeline
 var xScale,
   yScale,
   xAxis,
   yAxis,
+  x_axis_label,
+  y_axis_label,
   line;
 
+
+var stackTime,
+  stack,
+  chart,
+  dataStack;
 ////////////////////////////////////////////////////////////////////////////////
 // DATA PARSING / PROCESSING VARS / SETUP
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,7 +92,11 @@ var frisk_data,
 var startTime,
   endTime,
   padding_time,
-  brush;
+  brush,
+  gBrush,
+  y_axis_svg,
+  x_axis_svg;
+;
 
 
 // ALL RELEVANT VARIABLES HERE
@@ -127,7 +141,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     // DATA LOAD / REMOVE BAD TIMES
     frisk_data = data
     frisk_data = frisk_data.filter(function(d) {
-      return (d.time != "" && d.time != null && !(isNaN(d.time)));
+      return (d.time !== "" && d.time !== null && !(isNaN(d.time)));
     });
 
 
@@ -172,121 +186,43 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     // DATA MANIPULATION
     //////////////////////////////
     manipulateData();
-    // Get axes and start/end times in order
-    setUpTimeLine(friskTime_total);
-
-
-
-    var chart = timeline_svg.append("g")
-      .attr("id", "chartArea")
-      .selectAll(".bar")
-      .data(friskTime_total)
-      .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d, i) {
-        return padding_t;
-
-      })
-      .attr("y", function(d) {
-        return xScale(parseTime(d.key));
-      })
-      .attr("width", function(d) {
-        return yScale(d.value) - padding_t;
-      })
-      .attr("height", function(d) {
-        return ((h_t / 24) - 6);
-      });
-
-
-    // text label for the x axis
-    timeline_svg.append("text")
-      .attr("transform",
-        "translate(" + (w_t / 2) + " ," +
-        (h_t - .1 * padding_t_top) + ")")
-      .style("text-anchor", "middle")
-      .attr("font-size", 12)
-      .attr("font-family", "Helvetica Neue")
-      .attr("font-weight", "bold")
-      .text("# Stopped");
-
-    // text label for the y axis
-    timeline_svg.append("text")
-      // .attr("transform", "rotate(-90)")
-      .attr("y", (.75 * padding_t_top))
-      .attr("x", (padding_t / 2))
-      .style("text-anchor", "middle")
-      .attr("font-size", 12)
-      .attr("font-family", "Helvetica Neue")
-      .attr("font-weight", "bold")
-      .text("Time");
-
-    //Create axes
-    var x_axis_svg = timeline_svg.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate(0," + (h_t - padding_t_top) + ")")
-      .call(xAxis);
-
-    var y_axis_svg = timeline_svg.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate(" + padding_t + ",0)")
-      .call(yAxis);
-
-
-
-    //////////////////////////////////////////////////////////////////////
-      //// Brush functions
-      //////////////////////////////////////////////////////////////////////
-
-
-    brush = d3.brushY(xScale)
-      .extent([[padding_t, padding_t_top], [w_t - padding_t, h_t - padding_t_top]])
-      .on("brush end", highlightBrushedCircles);
-
-
-
-    var gBrush = d3.select("#chartArea")
-      .append("g")
-      .attr("class", "brush")
-      .call(brush);
-
-    gBrush.call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
-
-    function highlightBrushedCircles() {
-      // revert circles to initial style
-      nycmap_svg.selectAll("circle").classed("brushed", false);
-      nycmap_svg.selectAll("circle").attr("class", "nonbrushed");
-
-
-      var maxTime = xScale.invert(d3.event.selection[1]);
-      var minTime = xScale.invert(d3.event.selection[0]);
-
-
-      // style brushed circles
-      nycmap_svg.selectAll("circle").filter(function(d) {
-        var currTime = d.time;
-        return isBrushed(minTime, maxTime, currTime);
-      })
-        .classed("brushed", true);
-    }
-
-    function isBrushed(firstTime, lastTime, currentTime) {
-
-      if ((d3.max([firstTime, currentTime]) === currentTime)
-        && (d3.min([lastTime, currentTime]) === currentTime)) {
-
-        return true;
-      } else {
-        return false;
-      }
-    }
-
-
+    setUpTimeLine();
 
   //////////////////////////////////////////////////////////////////////
   });
 // END OF LOADING IN FRISK DATA
 });
 // end of GEOJSON loading
+
+function highlightBrushedCircles() {
+  // revert circles to initial style
+  nycmap_svg.selectAll("circle").classed("brushed", false);
+  nycmap_svg.selectAll("circle").attr("class", "nonbrushed");
+
+
+  var maxTime = xScale.invert(d3.event.selection[1]);
+  var minTime = xScale.invert(d3.event.selection[0]);
+
+
+  // style brushed circles
+  nycmap_svg.selectAll("circle").filter(function(d) {
+    var currTime = d.time;
+    return isBrushed(minTime, maxTime, currTime);
+  })
+    .classed("brushed", true);
+}
+
+function isBrushed(firstTime, lastTime, currentTime) {
+
+  if ((d3.max([firstTime, currentTime]) === currentTime)
+    && (d3.min([lastTime, currentTime]) === currentTime)) {
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 function manipulateData() {
   // BLACK
@@ -323,7 +259,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data);
-
+  friskTime_total.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_black = d3.nest()
     .key(function(d) {
@@ -333,7 +271,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_black);
-
+  friskTime_black.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_white = d3.nest()
     .key(function(d) {
@@ -343,7 +283,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_white);
-
+  friskTime_white.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_asian = d3.nest()
     .key(function(d) {
@@ -353,7 +295,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_asian);
-
+  friskTime_asian.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_hispanic = d3.nest()
     .key(function(d) {
@@ -363,7 +307,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_hispanic);
-
+  friskTime_hispanic.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_other = d3.nest()
     .key(function(d) {
@@ -373,7 +319,9 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_other);
-
+  friskTime_other.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
   // GROUP BY TIME
   friskTime_native = d3.nest()
     .key(function(d) {
@@ -383,14 +331,103 @@ function manipulateData() {
       return v.length
     })
     .entries(frisk_data_native);
+  friskTime_native.sort(function(x, y) {
+    return d3.ascending(parseTime(x.key), parseTime(y.key));
+  });
 
 }
 
 function setUpTimeLine(dataset) {
-  startTime = d3.min(dataset, function(d) {
+  //STACKED BAR chart
+  stackTime = [];
+  for (i = 0; i < friskTime_total.length; i++) {
+    var obj = {};
+    if (showAll || showBlack) {
+      //console.log(JSON.stringify(friskTime_black[i]["value"]));
+      if (typeof friskTime_black[i] !== 'undefined' && typeof friskTime_black[i]["value"] !== 'undefined' && !(isNaN(friskTime_black[i]["value"]))) {
+        obj['African American'] = friskTime_black[i]["value"];
+      } else {
+        obj['African American'] = 0;
+      }
+    }
+    if (showAll || showWhite) {
+      if (typeof friskTime_white[i] !== 'undefined' && typeof friskTime_white[i]["value"] !== 'undefined' && !(isNaN(friskTime_white[i]["value"]))) {
+        obj['Caucasian'] = friskTime_white[i]["value"];
+      } else {
+        obj['Caucasian'] = 0;
+      }
+    }
+    if (showAll || showAsian) {
+      if (typeof friskTime_asian[i] !== 'undefined' && typeof friskTime_asian[i]["value"] !== 'undefined' && !(isNaN(friskTime_asian[i]["value"]))) {
+        obj['Asian/Pacific Islander'] = friskTime_asian[i]["value"];
+      } else {
+        obj['Asian/Pacific Islander'] = 0;
+      }
+    }
+    if (showAll || showHispanic) {
+      if (typeof friskTime_hispanic[i] !== 'undefined' && typeof friskTime_hispanic[i]["value"] !== 'undefined' && !(isNaN(friskTime_hispanic[i]["value"]))) {
+        obj['Hispanic'] = friskTime_hispanic[i]["value"];
+      } else {
+        obj['Hispanic'] = 0;
+      }
+    }
+    if (showAll || showNative) {
+      //console.log(friskTime_native[i]);
+      if (typeof friskTime_native[i] !== 'undefined' && typeof friskTime_native[i]["value"] !== 'undefined' && !(isNaN(friskTime_native[i]["value"]))) {
+        //console.log('do we still get in here');
+        obj['American Indian/Alaskan Native'] = friskTime_native[i]["value"];
+      } else {
+        obj['American Indian/Alaskan Native'] = 0;
+      }
+    }
+    if (showAll || showOther) {
+      if (typeof friskTime_other[i] !== 'undefined' && typeof friskTime_other[i]["value"] !== 'undefined' && !(isNaN(friskTime_other[i]["value"]))) {
+        obj['Unknown/Other'] = friskTime_other[i]["value"];
+      } else {
+        obj['Unknown/Other'] = 0;
+      }
+    }
+    stackTime.push(obj)
+  }
+
+
+
+  var keyStack = [];
+  var colorIndexes = [];
+  if (showAll || showBlack) {
+    keyStack.push('African American');
+    colorIndexes.push(0);
+  }
+  if (showAll || showWhite) {
+    keyStack.push('Caucasian');
+    colorIndexes.push(1);
+  }
+  if (showAll || showAsian) {
+    keyStack.push('Asian/Pacific Islander');
+    colorIndexes.push(2);
+  }
+  if (showAll || showHispanic) {
+    keyStack.push('Hispanic');
+    colorIndexes.push(3);
+  }
+  if (showAll || showNative) {
+    keyStack.push('American Indian/Alaskan Native');
+    colorIndexes.push(4);
+  }
+  if (showAll || showOther) {
+    keyStack.push('Unknown/Other');
+    colorIndexes.push(5);
+  }
+
+
+  stack = d3.stack()
+    .keys(keyStack);
+
+  dataStack = stack(stackTime);
+  startTime = d3.min(friskTime_total, function(d) {
     return parseTime(d.key).getTime();
   });
-  endTime = d3.max(dataset, function(d) {
+  endTime = d3.max(friskTime_total, function(d) {
     return parseTime(d.key).getTime();
   });
   padding_time = (endTime - startTime) * .035;
@@ -405,9 +442,12 @@ function setUpTimeLine(dataset) {
 
   // Setting up scalers
   yScale = d3.scaleLinear()
-    .domain([0, d3.max(dataset, function(d) {
-      return d.value;
-    })])
+    .domain([0, d3.max(dataStack, function(d) {
+      return d3.max(d, function(d) {
+        return d[1];
+      });
+    })
+    ])
     .rangeRound([padding_t, w_t - padding_t])
 
 
@@ -422,10 +462,101 @@ function setUpTimeLine(dataset) {
     .ticks(24)
     .tickFormat(reformatTime);
 
-}
 
+  chart = timeline_svg
+    .append("g")
+    .attr("id", "chartArea")
+    .attr('class', 'stacked')
+    .selectAll("g")
+    .data(dataStack)
+    .enter()
+    .append("g")
+    .style("fill", function(d, i) {
+      return timeColorScale(colorIndexes[i]);
+    })
+    .selectAll("rect")
+    .data(function(d) {
+      console.log(d);
+      return d;
+    })
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", function(d, i) {
+      //console.log(d[0].value);
+      return yScale(d[0]);
+    })
+    .attr("y", function(d, i) {
+      var keyString;
+      if (i < 10) {
+        keyString = "0" + i + ":00";
+      } else {
+        keyString = i + ":00";
+      }
+      return xScale(parseTime(keyString));
+    })
+    .attr("height", function(d) {
+      return ((h_t / 24) - 6);
+    })
+    .attr("width", function(d) {
+      return (yScale(d[1]) - yScale(d[0]));
+    });
+
+  // text label for the x axis
+  x_axis_label = timeline_svg.append("text")
+    .attr("transform",
+      "translate(" + (w_t / 2) + " ," +
+      (h_t - .1 * padding_t_top) + ")")
+    .style("text-anchor", "middle")
+    .attr("font-size", 12)
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-weight", "bold")
+    .text("# Stopped");
+
+  // text label for the y axis
+  y_axis_label = timeline_svg.append("text")
+    // .attr("transform", "rotate(-90)")
+    .attr("y", (.75 * padding_t_top))
+    .attr("x", (padding_t / 2))
+    .style("text-anchor", "middle")
+    .attr("font-size", 12)
+    .attr("font-family", "Helvetica Neue")
+    .attr("font-weight", "bold")
+    .text("Time");
+
+  //Create axes
+  x_axis_svg = timeline_svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + (h_t - padding_t_top) + ")")
+    .call(xAxis);
+
+  y_axis_svg = timeline_svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(" + padding_t + ",0)")
+    .call(yAxis);
+
+
+  //////////////////////////////////////////////////////////////////////
+    //// Brush functions
+    //////////////////////////////////////////////////////////////////////
+
+
+  brush = d3.brushY(xScale)
+    .extent([[padding_t, padding_t_top], [w_t - padding_t, h_t - padding_t_top]])
+    .on("brush end", highlightBrushedCircles);
+
+
+  if (showAll || showHispanic || showBlack || showWhite || showAsian || showOther) {
+    gBrush = d3.select("#chartArea")
+      .append("g")
+      .attr("class", "brush")
+      .call(brush);
+
+    gBrush.call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
+  }
+}
+// toggle animation function
 var toggleAnimation = function(d) {
-  var ease = d3.easeLinear();
   var timeDiff = endTime - startTime;
   const iterations = 25;
   var adjustment = timeDiff / iterations;
@@ -447,23 +578,18 @@ var toggleAnimation = function(d) {
   }
 }
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 ////// UPDATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+// Animate Function
 d3.selectAll('#anim-btn')
   .on('click', function() {
     toggleAnimation()
   });
-
-
-
+// Button Selection
 d3.selectAll('button.nyc_map')
   .on('click', function() {
     var self = this.id;
-    console.log('INSIDE OF BUTTON FUNCTION')
-    console.log(self)
     switch (self) {
       case 'whiteButton':
         if (showWhite) {
@@ -509,8 +635,10 @@ d3.selectAll('button.nyc_map')
         break;
       case 'allButton':
         var showButton = window.parent.document.getElementById('allButton');
+        var buttonDirect = window.parent.document.getElementById('buttonDirections');
         if (showAll) {
           showButton.innerHTML = 'Show All';
+          buttonDirect.innerHTML = ''
           showAll = false;
           showHispanic = false;
           showBlack = false;
@@ -519,6 +647,7 @@ d3.selectAll('button.nyc_map')
           showNative = false;
           setOtherButtons(false);
         } else {
+          buttonDirect.innerHTML = 'Currently showing stops for all races. Click the reset button to look closer at a specific demographic.';
           showButton.innerHTML = 'Reset';
           showAll = true;
           setOtherButtons(true);
@@ -527,18 +656,23 @@ d3.selectAll('button.nyc_map')
       default:
         console.log('NONE');
     }
+    chart.remove();
+    x_axis_svg.remove();
+    y_axis_svg.remove();
+    x_axis_label.remove();
+    y_axis_label.remove();
+    gBrush.remove();
     // END SWITCH STATEMENT
     update_circles_color();
+    setUpTimeLine();
 
   });
-  // END OF ON CLICK
-
-
+// END OF ON CLICK
 var initialView = function() {
   var showButton = window.parent.document.getElementById('allButton');
   showButton.innerHTML = 'Reset';
   var directions = window.parent.document.getElementById('buttonDirections');
-  directions.innerHTML = 'Currently showing all races. Click Reset to begin.';
+  directions.innerHTML = 'Currently showing stops for all races. Click \'Reset\' to look closer at a specific demographic.';
   showAll = true;
   setOtherButtons(true);
   update_circles_color();
@@ -551,8 +685,6 @@ var setOtherButtons = function(disabled) {
   $('#asianButton').prop('disabled', disabled);
   $('#nativeButton').prop('disabled', disabled);
 }
-
-
 
 // UPDATE circles
 var update_circles_color = function() {
