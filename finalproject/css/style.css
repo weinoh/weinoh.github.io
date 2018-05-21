@@ -129,13 +129,13 @@ header.major {
   transition: all 0.3s;
 }
 
-#nyc_map path:hover {
+/*#nyc_map path:hover {
   fill: rgba(0, 0, 0, 0.6);
 }
 
 #nyc_map path:active {
   fill: rgba(0, 0, 0, 0.6);
-}
+}*/
 
 #tooltip {
   position: absolute;
