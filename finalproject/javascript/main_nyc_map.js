@@ -89,6 +89,11 @@ var realTimes = [formatTime("00:00"), formatTime("01:00"), formatTime("02:00"), 
 var frisk_data,
   friskByTime;
 
+var startTime,
+  endTime,
+  padding_time,
+  brush;
+
 
 
 var friskRowConverter = function(data) {
@@ -226,13 +231,13 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     //   return parseTime(d.key);
     // });
 
-    var startTime = d3.min(friskByTime, function(d) {
-        return parseTime(d.key).getTime();
-      }),
-      endTime = d3.max(friskByTime, function(d) {
-        return parseTime(d.key).getTime();
-      }),
-      padding_time = (endTime - startTime) * .035;
+    startTime = d3.min(friskByTime, function(d) {
+      return parseTime(d.key).getTime();
+    });
+    endTime = d3.max(friskByTime, function(d) {
+      return parseTime(d.key).getTime();
+    });
+    padding_time = (endTime - startTime) * .035;
 
 
     xScale = d3.scaleTime()
@@ -331,7 +336,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       //////////////////////////////////////////////////////////////////////
 
 
-    var brush = d3.brushY(xScale)
+    brush = d3.brushY(xScale)
       .extent([[padding_t, padding_t_top], [w_t - padding_t, h_t - padding_t_top]])
       .on("brush end", highlightBrushedCircles);
 
@@ -342,7 +347,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       .attr("class", "brush")
       .call(brush);
 
-    gBrush.call(brush.move, [xScale(parseTime("20:00")), xScale(parseTime("23:59"))]);
+    gBrush.call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
 
 
 
@@ -390,12 +395,45 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
 });
 // end of GEOJSON loading
 
+var toggleAnimation = function(d) {
+  var timeDiff = endTime - padding_time - startTime;
+  const iterations = 25;
+  var adjustment = timeDiff / iterations;
+
+  let nextTime = startTime + adjustment;
+  d3.select("g .brush")
+    .transition()
+    .duration(500)
+    .call(brush.move, [xScale(startTime), xScale(nextTime)]);
+
+  for (let i = 1; i < iterations; i++) {
+    let nextStartTime = startTime + (adjustment * i);
+    let nextEndTime = nextStartTime + adjustment;
+    d3.select("g .brush")
+      .transition()
+      .duration(750)
+      .delay(750 * i)
+      .call(brush.move, [xScale(nextStartTime), xScale(nextEndTime)]);
+  }
+  d3.select("g .brush")
+    .transition()
+    .duration(500)
+    .delay(500 * i)
+    .call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
+}
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 ////// UPDATE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////
+d3.selectAll('#anim-btn')
+  .on('click', function() {
+    toggleAnimation()
+  });
+
+
+
 d3.selectAll('button.nyc_map')
   .on('click', function() {
     var self = this.id;
