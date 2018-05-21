@@ -215,12 +215,11 @@ header.major {
   stroke-width: 0;
 }
 
-
-.brush{
-  opacity: .3;
-  stroke: "gray";
-  fill: "gray";
+.brush rect.extent {
+  fill: red;
+  fill-opacity: .6;
 }
+
 
 .nonbrushed{
   opacity: 0 ;

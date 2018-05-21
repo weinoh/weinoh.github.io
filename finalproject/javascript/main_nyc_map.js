@@ -41,6 +41,7 @@ var nycmap_svg = d3.select("#nyc_map")
 // Width and Height of Timeline
 var w_t = document.getElementById("timeline").offsetWidth;
 var h_t = h_map / 2;
+var padding_t_top = 30;
 var padding_t = w_t / 10;
 // Append SVG For Hour Histogram
 var timeline_svg = d3.select("#timeline")
@@ -239,14 +240,14 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
         startTime, //startDate minus one day, for padding
         endTime + padding_time //endDate plus one day, for padding
       ])
-      .rangeRound([padding_t, h_t - padding_t]);
+      .rangeRound([padding_t_top, h_t - padding_t_top]);
 
     // Setting up scalers
     yScale = d3.scaleLinear()
       .domain([0, d3.max(friskByTime, function(d) {
         return d.value;
       })])
-      .rangeRound([padding_t, w_t - 2 * padding_t])
+      .rangeRound([padding_t, w_t - padding_t])
 
 
     //Define axes
@@ -260,8 +261,18 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       .ticks(24)
       .tickFormat(reformatTime);
 
+    // var barChartG = timeline_svg.append("g")
+      //   .attr("id", "barCanvas")
+      //   .attr("width", w_t - 2 * padding_t)
+      //   .attr("height", h_t - 2 * padding_t_top)
+      //   .attr("x", padding_t)
+      //   .attr("y", h_t - padding_t_top)
+      //
+      //   .attr("fill", "steelblue");
 
-    timeline_svg.selectAll(".bar")
+    var chart = timeline_svg.append("g")
+      .attr("id", "chartArea")
+      .selectAll(".bar")
       .data(friskByTime)
       .enter().append("rect")
       .attr("class", "bar")
@@ -284,7 +295,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     timeline_svg.append("text")
       .attr("transform",
         "translate(" + (w_t / 2) + " ," +
-        (h_t - (padding_t / 2)) + ")")
+        (h_t - .1 * padding_t_top) + ")")
       .style("text-anchor", "middle")
       .attr("font-size", 12)
       .attr("font-family", "Helvetica Neue")
@@ -294,7 +305,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     // text label for the y axis
     timeline_svg.append("text")
       // .attr("transform", "rotate(-90)")
-      .attr("y", (.8 * padding_t))
+      .attr("y", (.75 * padding_t_top))
       .attr("x", (padding_t / 2))
       .style("text-anchor", "middle")
       .attr("font-size", 12)
@@ -303,39 +314,35 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       .text("Time");
 
     //Create axes
-    timeline_svg.append("g")
+    var x_axis_svg = timeline_svg.append("g")
       .attr("class", "axis")
-      .attr("transform", "translate(0," + (h_t - padding_t) + ")")
+      .attr("transform", "translate(0," + (h_t - padding_t_top) + ")")
       .call(xAxis);
 
-    timeline_svg.append("g")
+    var y_axis_svg = timeline_svg.append("g")
       .attr("class", "axis")
       .attr("transform", "translate(" + padding_t + ",0)")
       .call(yAxis);
 
 
 
-    // ////////////////////////////////////////////////////////////////////
-      //   // Brush functions
-      //   ////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+      //// Brush functions
+      //////////////////////////////////////////////////////////////////////
 
 
     var brush = d3.brushY(xScale)
+      .extent([[padding_t, padding_t_top], [w_t - padding_t, h_t - padding_t_top]])
       .on("brush end", highlightBrushedCircles);
 
 
 
-    var g = timeline_svg.append("g")
-      .attr("height", 10)
-      // .attr("width", 10)
-      .attr("transform", "translate(" + padding_t + "," + padding_t + ")");
-
-
-    var gBrush = g.append("g")
+    var gBrush = d3.select("#chartArea")
+      .append("g")
       .attr("class", "brush")
       .call(brush);
 
-    gBrush.call(brush.move, [xScale(parseTime("20:00:00")), xScale(parseTime("23:59:00"))]);
+    gBrush.call(brush.move, [xScale(parseTime("20:00")), xScale(parseTime("23:59"))]);
 
 
 
@@ -356,7 +363,7 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       // style brushed circles
       nycmap_svg.selectAll("circle").filter(function(d) {
         var currTime = d.time;
-        return isBrushed(parseDate(minTime), parseDate(maxTime), currTime);
+        return isBrushed(minTime, maxTime, currTime);
       })
         .classed("brushed", true);
     }
@@ -365,12 +372,10 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
 
 
     function isBrushed(firstTime, lastTime, currentTime) {
-      console.log(firstTime);
-      console.log(currentTime);
-      console.log(lastTime);
 
       if ((d3.max([firstTime, currentTime]) === currentTime)
         && (d3.min([lastTime, currentTime]) === currentTime)) {
+
         return true;
       } else {
         return false;
