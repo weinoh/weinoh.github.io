@@ -50,7 +50,6 @@ var timeline_svg = d3.select("#timeline")
   .attr("height", h_t);
 var timeColorScale = d3.scaleOrdinal()
   .range(["red", "green", "orange", "purple", "skyblue", "black"]);
-
 // Graphing variables, timeline
 var xScale,
   yScale,
