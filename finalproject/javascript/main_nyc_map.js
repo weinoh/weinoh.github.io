@@ -49,7 +49,7 @@ var timeline_svg = d3.select("#timeline")
   .attr("width", w_t)
   .attr("height", h_t);
 var timeColorScale = d3.scaleOrdinal()
-  .range(["#b22222", "#00ffec", "#00ff2b", "#FFA500", "#ff69b4", "#000000"]);
+  .range(["red", "green", "orange", "purple", "blue", "black"]);
 
 // Graphing variables, timeline
 var xScale,
@@ -716,22 +716,22 @@ var update_circles_color = function() {
     .attr("fill", function(d, i) {
       if ((showAll || showBlack) && (d.race == "B")) {
         // BLACK
-        return "#b22222"
+        return "red"
       } else if ((showAll || showWhite) && (d.race == "W")) {
         // WHITE
-        return "#00ffec"
+        return "green"
       } else if ((showAll || showAsian) && (d.race == "A")) {
         // ASIAN
-        return "#00ff2b"
+        return "orange"
       } else if ((showAll || showNative) && (d.race == "I")) {
         // NATIVE AMERICAN
-        return "#ff69b4"
+        return "blue"
       } else if ((showAll || showHispanic) && (d.race == "P" || d.race == "Q")) {
         // HISPANIC
-        return "#FFA500"
+        return "purple"
       } else if ((showAll || showOther) && (d.race == "X" || d.race == "Z")) {
         // HISPANIC
-        return "#000000"
+        return "black"
       } else {
         return "rgba(0,0,0,0)"
       }

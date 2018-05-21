@@ -182,28 +182,28 @@ header.major {
 }
 
 .btn-secondary.black {
-	background-color: #b22222;
-	border-color: #b22222;
+	background-color: red;
+	border-color: red;
 }
 .btn-secondary.asian {
-	background-color: #00ff2b;
-	border-color: #00ff2b;
+	background-color: orange;
+	border-color: orange;
 }
 .btn-secondary.white {
-	background-color: #00ffec;
-	border-color: #00ffec;
+	background-color: green;
+	border-color: green;
 }
 .btn-secondary.native {
-	background-color: #ff69b4;
-	border-color: #ff69b4;
+	background-color: blue;
+	border-color: blue;
 }
 .btn-secondary.hispanic {
-	background-color: #FFA500;
-	border-color: #FFA500;
+	background-color: purple;
+	border-color: purple;
 }
 .btn-secondary.other {
-	background-color: #000000;
-	border-color: #000000;
+	background-color: black;
+	border-color: black;
 }
 
 .centerButtons{
