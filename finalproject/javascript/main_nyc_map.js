@@ -49,7 +49,7 @@ var timeline_svg = d3.select("#timeline")
   .attr("width", w_t)
   .attr("height", h_t);
 var timeColorScale = d3.scaleOrdinal()
-  .range(["red", "green", "orange", "purple", "blue", "black"]);
+  .range(["red", "green", "orange", "purple", "skyblue", "black"]);
 
 // Graphing variables, timeline
 var xScale,
@@ -725,7 +725,7 @@ var update_circles_color = function() {
         return "orange"
       } else if ((showAll || showNative) && (d.race == "I")) {
         // NATIVE AMERICAN
-        return "blue"
+        return "skyblue"
       } else if ((showAll || showHispanic) && (d.race == "P" || d.race == "Q")) {
         // HISPANIC
         return "purple"
