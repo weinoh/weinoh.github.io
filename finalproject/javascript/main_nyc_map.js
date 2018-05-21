@@ -55,39 +55,29 @@ var xScale,
   yAxis,
   line;
 
-var times = ["1:00 am", "2:00 am", "3:00 am",
-  "4:00 am", "5:00 am", "6:00 am",
-  "7:00 am", "8:00 am", "9:00 am",
-  "10:00 am", "11:00 am", "12:00 pm",
-  "1:00 pm", "2:00 pm", "3:00 pm",
-  "4:00 pm", "5:00 pm", "6:00 pm",
-  "7:00 pm", "8:00 pm", "9:00 pm",
-  "10:00 pm", "11:00 pm", "12:00 am"]
-
-
-
-var formatTime = d3.timeFormat("%H:%M");
-// d3 functions for parsing dates and times
-
-var parseDateTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
-var parseTime = d3.timeParse("%H:%M");
-var parseRandom = d3.timeParse("%Y-%m-%d %H:%M");
-
-var reformatTime = d3.timeFormat("%I:%M %p");
-
-var realTimes = [formatTime("00:00"), formatTime("01:00"), formatTime("02:00"), formatTime("03:00"),
-  formatTime("04:00"), formatTime("05:00"), formatTime("06:00"),
-  formatTime("07:00"), formatTime("08:00"), formatTime("09:00"),
-  formatTime("10:00"), formatTime("11:00"), formatTime("12:00"),
-  formatTime("13:00"), formatTime("14:00"), formatTime("15:00"),
-  formatTime("16:00"), formatTime("17:00"), formatTime("18:00"),
-  formatTime("19:00"), formatTime("20:00"), formatTime("21:00"),
-  formatTime("22:00"), formatTime("23:00")]
 ////////////////////////////////////////////////////////////////////////////////
 // DATA PARSING / PROCESSING VARS / SETUP
 ////////////////////////////////////////////////////////////////////////////////
+// d3 functions for parsing dates and times
+var formatTime = d3.timeFormat("%H:%M");
+var parseDateTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+var parseTime = d3.timeParse("%H:%M");
+var reformatTime = d3.timeFormat("%I:%M %p");
+// variables for frisk data
 var frisk_data,
-  friskByTime;
+  frisk_data_black,
+  frisk_data_white,
+  frisk_data_asian,
+  frisk_data_hispanic,
+  frisk_data_native,
+  frisk_data_other,
+  friskTime_total,
+  friskTime_black,
+  friskTime_white,
+  friskTime_asian,
+  friskTime_hispanic,
+  friskTime_native,
+  friskTime_other;
 
 var startTime,
   endTime,
@@ -95,7 +85,7 @@ var startTime,
   brush;
 
 
-
+// ALL RELEVANT VARIABLES HERE
 var friskRowConverter = function(data) {
   return {
     date: parseDateTime(data.datestop),
@@ -133,27 +123,18 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
   //////////////////////////////////////////////////////////////////////////////
   //Load in FRISK DATA
   //////////////////////////////////////////////////////////////////////////////
-  d3.csv("./csv/stop_frisk.csv", friskRowConverter, function(error, data) {
-
-    // ERROR HANDLING
-    if (error && error.status === 404) {
-      console.log("File not found");
-    }
-    if (data.length == 0) {
-      console.log("File empty");
-    }
-    // END ERROR HANDLING
-
-    // DATA LOAD
+  d3.csv("./csv/stop_frisk.csv", friskRowConverter, function(data) {
+    // DATA LOAD / REMOVE BAD TIMES
     frisk_data = data
-    console.log("frisk data");
-    console.log(frisk_data);
     frisk_data = frisk_data.filter(function(d) {
       return (d.time != "" && d.time != null && !(isNaN(d.time)));
     });
 
+
+
     //////////////////////////////////////////
     // Draw circles for first time for murders
+    /////////////////////////////////////////
     circles = nycmap_svg.selectAll("circle")
       .data(frisk_data)
       .enter()
@@ -173,22 +154,13 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
           return 0;
         }
       })
-      .attr("r", 1.5)
+      .attr("r", 2)
       .attr("stroke", "black")
-      .attr("stroke-width", 0.15)
+      .attr("stroke-width", 0.25)
       .attr("fill", "rbga(0,0,0,0)");
 
     // LOAD INITIAL VIEW OF ALL CIRCLES
     initialView();
-    // .attr("class", function(d) {
-    //
-    //   if (isBrushed(parseTime("20:00"),
-    //       parseTime("23:59"), d.time)) {
-    //     return "brushed";
-    //   } else {
-    //     return "nonbrushed";
-    //   }
-    // });
     // END OF CIRCLE DRAWING
 
 
@@ -199,86 +171,16 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
     //////////////////////////////
     // DATA MANIPULATION
     //////////////////////////////
-
-    // GROUP BY TIME
-    friskByTime = d3.nest()
-      .key(function(d) {
-        return formatTime(d3.timeHour.round(d.time));
-      })
-      .rollup(function(v) {
-        return v.length
-      })
-      .entries(frisk_data);
+    manipulateData();
+    // Get axes and start/end times in order
+    setUpTimeLine(friskTime_total);
 
 
-
-    // SORT BY TIME
-    friskByTime.sort(function(x, y) {
-      return d3.ascending(x.key, y.key);
-    });
-    console.log("frisk by time");
-    console.log(friskByTime);
-
-
-
-    // //Discover start and end dates in dataset
-    // var startTime = d3.min(friskByTime, function(d) {
-    //   return parseTime(d.key);
-    // });
-    //
-    //
-    // var endTime = d3.max(friskByTime, function(d) {
-    //   return parseTime(d.key);
-    // });
-
-    startTime = d3.min(friskByTime, function(d) {
-      return parseTime(d.key).getTime();
-    });
-    endTime = d3.max(friskByTime, function(d) {
-      return parseTime(d.key).getTime();
-    });
-    padding_time = (endTime - startTime) * .035;
-
-
-    xScale = d3.scaleTime()
-      .domain([
-        startTime, //startDate minus one day, for padding
-        endTime + padding_time //endDate plus one day, for padding
-      ])
-      .rangeRound([padding_t_top, h_t - padding_t_top]);
-
-    // Setting up scalers
-    yScale = d3.scaleLinear()
-      .domain([0, d3.max(friskByTime, function(d) {
-        return d.value;
-      })])
-      .rangeRound([padding_t, w_t - padding_t])
-
-
-    //Define axes
-    xAxis = d3.axisBottom()
-      .scale(yScale)
-      .ticks(10);
-
-    //Define Y axis
-    yAxis = d3.axisLeft()
-      .scale(xScale)
-      .ticks(24)
-      .tickFormat(reformatTime);
-
-    // var barChartG = timeline_svg.append("g")
-      //   .attr("id", "barCanvas")
-      //   .attr("width", w_t - 2 * padding_t)
-      //   .attr("height", h_t - 2 * padding_t_top)
-      //   .attr("x", padding_t)
-      //   .attr("y", h_t - padding_t_top)
-      //
-      //   .attr("fill", "steelblue");
 
     var chart = timeline_svg.append("g")
       .attr("id", "chartArea")
       .selectAll(".bar")
-      .data(friskByTime)
+      .data(friskTime_total)
       .enter().append("rect")
       .attr("class", "bar")
       .attr("x", function(d, i) {
@@ -349,12 +251,6 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
 
     gBrush.call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
 
-
-
-
-
-
-
     function highlightBrushedCircles() {
       // revert circles to initial style
       nycmap_svg.selectAll("circle").classed("brushed", false);
@@ -372,9 +268,6 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
       })
         .classed("brushed", true);
     }
-
-
-
 
     function isBrushed(firstTime, lastTime, currentTime) {
 
@@ -395,8 +288,145 @@ d3.json("./geojson/nyc_zip.geojson", function(json) {
 });
 // end of GEOJSON loading
 
+function manipulateData() {
+  // BLACK
+  frisk_data_black = frisk_data.filter(function(d) {
+    return (d.race == "B");
+  });
+  // WHITE
+  frisk_data_white = frisk_data.filter(function(d) {
+    return (d.race == "W");
+  });
+  // asian
+  frisk_data_asian = frisk_data.filter(function(d) {
+    return (d.race == "A");
+  });
+  // native
+  frisk_data_native = frisk_data.filter(function(d) {
+    return (d.race == "I");
+  });
+  // hispanic
+  frisk_data_hispanic = frisk_data.filter(function(d) {
+    return (d.race == "P" || d.race == "Q");
+  });
+  // other
+  frisk_data_other = frisk_data.filter(function(d) {
+    return (d.race == "X" || d.race == "Z");
+  });
+
+  // GROUP BY TIME
+  friskTime_total = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data);
+
+  // GROUP BY TIME
+  friskTime_black = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_black);
+
+  // GROUP BY TIME
+  friskTime_white = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_white);
+
+  // GROUP BY TIME
+  friskTime_asian = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_asian);
+
+  // GROUP BY TIME
+  friskTime_hispanic = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_hispanic);
+
+  // GROUP BY TIME
+  friskTime_other = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_other);
+
+  // GROUP BY TIME
+  friskTime_native = d3.nest()
+    .key(function(d) {
+      return formatTime(d3.timeHour.round(d.time));
+    })
+    .rollup(function(v) {
+      return v.length
+    })
+    .entries(frisk_data_native);
+
+}
+
+function setUpTimeLine(dataset) {
+  startTime = d3.min(dataset, function(d) {
+    return parseTime(d.key).getTime();
+  });
+  endTime = d3.max(dataset, function(d) {
+    return parseTime(d.key).getTime();
+  });
+  padding_time = (endTime - startTime) * .035;
+
+
+  xScale = d3.scaleTime()
+    .domain([
+      startTime, //startDate minus one day, for padding
+      endTime + padding_time //endDate plus one day, for padding
+    ])
+    .rangeRound([padding_t_top, h_t - padding_t_top]);
+
+  // Setting up scalers
+  yScale = d3.scaleLinear()
+    .domain([0, d3.max(dataset, function(d) {
+      return d.value;
+    })])
+    .rangeRound([padding_t, w_t - padding_t])
+
+
+  //Define axes
+  xAxis = d3.axisBottom()
+    .scale(yScale)
+    .ticks(10);
+
+  //Define Y axis
+  yAxis = d3.axisLeft()
+    .scale(xScale)
+    .ticks(24)
+    .tickFormat(reformatTime);
+
+}
+
 var toggleAnimation = function(d) {
-  var timeDiff = endTime - padding_time - startTime;
+  var ease = d3.easeLinear();
+  var timeDiff = endTime - startTime;
   const iterations = 25;
   var adjustment = timeDiff / iterations;
 
@@ -415,11 +445,6 @@ var toggleAnimation = function(d) {
       .delay(750 * i)
       .call(brush.move, [xScale(nextStartTime), xScale(nextEndTime)]);
   }
-  d3.select("g .brush")
-    .transition()
-    .duration(500)
-    .delay(500 * i)
-    .call(brush.move, [xScale(parseTime("15:00")), xScale(parseTime("19:00"))]);
 }
 
 

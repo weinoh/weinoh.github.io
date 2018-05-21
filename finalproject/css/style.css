@@ -220,10 +220,6 @@ header.major {
   fill-opacity: .6;
 }
 
-.brush rect.extent{
-  fill: red;
-  fill-opacity: .6;
-}
 
 .nonbrushed{
   opacity: 0 ;
