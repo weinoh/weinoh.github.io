@@ -646,7 +646,7 @@ d3.selectAll('button.nyc_map')
           showNative = false;
           setOtherButtons(false);
         } else {
-          buttonDirect.innerHTML = 'Currently showing stops for all races. Click the reset button to look closer at a specific demographic.';
+          buttonDirect.innerHTML = 'Currently showing stops for all races. Click \'Reset\' to look closer at a specific demographic.';
           showButton.innerHTML = 'Reset';
           showAll = true;
           setOtherButtons(true);
